@@ -97,18 +97,22 @@ class ExperimentRuntime(ioHubExperimentRuntime):
                 
                 writer.writerows([[subject_id, decision, trigger_value, input_decision]])
                 
-        def read_input_file(csv_dir):
+        def read_input_file(csv_dir, item_number):
     
-            global subj_id
+            global subject_id
+            i=0
             
             with open(csv_dir, 'rb') as csvfile:
                 spamreader = csv.reader(csvfile, delimiter='\n', quotechar='|')
                 print(spamreader)
                
                 for row in spamreader:
-                    if row[0].split(",")[6] == str(subj_id):
-                        print(subj_id, row, str(subj_id))
-                        return row[0].split(',')
+                    i=i+1
+                    if (i==item_number):
+                        print(subject_id, row, str(subject_id))
+                        return row
+                        
+            return 0
 
         def instructions_blank_screen(win):
 
@@ -135,7 +139,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             key=event.waitKeys(keyList=['c', 'm']) 
             return key
     
-        def draw_trigger(win, tracker, trigger):
+        def draw_trigger(win, tracker, trigger, item_number):
             choice = 0
     
             flip_time=win.flip()
@@ -144,7 +148,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             tracker.setRecordingState(True)
             
             tracker.setTriggerValue(trigger)
-            input_decision = 'input desicionnn'
+            input_decision = read_input_file(input_file_dir, item_number)
             
             if (trigger == 1001):
                 instructions_blank_screen(win)
@@ -336,7 +340,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             key=event.waitKeys(keyList=['space'])
             
             trigger_value=1001
-            draw_trigger(win, tracker, trigger_value)
+            draw_trigger(win, tracker, trigger_value, t+1)
             
             start_message = visual.TextStim(win, text="5", pos = [0,0], height=35,color=[255,255,255],colorSpace='rgb255',wrapWidth=win.size[0]*.9)
             start_message.draw()
@@ -344,7 +348,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             key=event.waitKeys(keyList=['space'])
             
             trigger_value=2001
-            draw_trigger(win, tracker, trigger_value)
+            draw_trigger(win, tracker, trigger_value, t+1)
             
             start_message = visual.TextStim(win, text="6", pos = [0,0], height=35,color=[255,255,255],colorSpace='rgb255',wrapWidth=win.size[0]*.9)
             start_message.draw()
@@ -353,7 +357,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
 
             
             trigger_value=3001
-            draw_trigger(win, tracker, trigger_value)
+            draw_trigger(win, tracker, trigger_value, t+1)
             
             start_message = visual.TextStim(win, text="7", pos = [0,0], height=35,color=[255,255,255],colorSpace='rgb255',wrapWidth=win.size[0]*.9)
             start_message.draw()
@@ -426,7 +430,7 @@ if __name__ == "__main__":
         # The merged result is saved as iohub_config.yaml so it can be picked up
         # by the Experiment _runtime
         # as normal.
-        global subj_id
+        global subject_id
         global con
         
         eye_tracker_config_files={
