@@ -12,7 +12,7 @@ Eye Tracker hardware used.
 Inital Version: May 6th, 2013, Sol Simpson
 """
 from psychopy import visual, event,core, logging
-from psychopy.data import TrialHandler,importConditions
+from psychopy.data import importConditions #TrialHandler,
 from psychopy.iohub import (EventConstants, EyeTrackerConstants,
                             getCurrentDateTimeString, ioHubExperimentRuntime)
 import os
@@ -57,11 +57,11 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         
         from psychopy.iohub import module_directory
         exp_script_dir = module_directory(self.run)
-        exp_conditions = importConditions(os.path.join(exp_script_dir,
-                                                       'trial_conditions.xlsx'))
+        #exp_conditions = importConditions(os.path.join(exp_script_dir,
+        #                                               'trial_conditions.xlsx'))
                                                        
         #TrialHandler(trialList, nReps, method=’random’, dataTypes=None, extraInfo=None, seed=None, originPath=None, name=’‘, autoLog=True)
-        trials = TrialHandler(exp_conditions, 1) # 1 - number of repetitions, how do we use conditions lets try to comment out
+        #trials = TrialHandler(exp_conditions, 1) # 1 - number of repetitions, how do we use conditions lets try to comment out
         
         #Use Esc to quit, it will be called at some stages during the experiment
         def _checkQuit(key):
@@ -286,7 +286,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         # in the order run / collected.
         #
         
-        self.hub.createTrialHandlerRecordTable(trials)
+        #self.hub.createTrialHandlerRecordTable(trials)
 
         selected_eyetracker_name=args[0]
         
@@ -383,7 +383,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         #show logs window message with '3', proceed with space
         logs_windows('3', 'space')
 
-        trials.printAsText() #does not work
+        #trials.printAsText() #does not work
         #tracker.getLastGazePosition()
         
         
