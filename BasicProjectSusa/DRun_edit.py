@@ -60,7 +60,8 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         exp_conditions = importConditions(os.path.join(exp_script_dir,
                                                        'trial_conditions.xlsx'))
                                                        
-        trials = TrialHandler(exp_conditions, 1)
+        #TrialHandler(trialList, nReps, method=’random’, dataTypes=None, extraInfo=None, seed=None, originPath=None, name=’‘, autoLog=True)
+        trials = TrialHandler(exp_conditions, 1) # 1 - number of repetitions, how do we use conditions lets try to comment out
         
         #Use Esc to quit, it will be called at some stages during the experiment
         def _checkQuit(key):
@@ -69,7 +70,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
                 core.quit()
         
         ###########
-        #### Fiona's experiment functions
+        #### Experiment functions
         ###########
         def to_output(subject_id, decision, trigger_value, input_decision, output_file_dir):
 
@@ -102,12 +103,12 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             
             with open(csv_dir, 'rb') as csvfile:
                 spamreader = csv.reader(csvfile, delimiter='\n', quotechar='|')
-                print(spamreader)
+                #print(spamreader)
                
                 for row in spamreader:
                     i=i+1
                     if (i==item_number):
-                        print(subject_id, row, str(subject_id))
+                        #print(subject_id, row, str(subject_id))
                         return row
                         
             return 0
@@ -128,6 +129,64 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             instr.draw()
             win.flip()
             key=event.waitKeys(keyList=['space'])
+            #print(event.id)
+            print(tracker.getPosition()) #tracker - get position = none
+            print(kb.getEvents())  #kb.getEvents(event_type_id)
+            
+            '''KeyboardReleaseEventNT(experiment_id=1, session_id=1, device_id=0, 
+                event_id=175, type=23, device_time=15105.28, logged_time=23.941098399425755, time=23.941098399425755, 
+                confidence_interval=0.0, delay=0.0, filter_id=0, auto_repeated=0, scan_code=57, key_id=32, ucode=0, key=' ', 
+                modifiers=[], window_id=1049896, char=u' ', duration=0.059997031472448725, press_event_id=172), 
+                
+                KeyboardPressEventNT(experiment_id=1, session_id=1, device_id=0, event_id=179, type=22, device_time=15105.374, 
+                logged_time=24.041724395678102, time=24.041724395678102, confidence_interval=0.0, delay=0.0, filter_id=0, 
+                auto_repeated=0, scan_code=57, key_id=32, ucode=0, key=' ', modifiers=[], window_id=1049896, char=u' ', duration=0.0, 
+                press_event_id=0), 
+                
+                KeyboardReleaseEventNT(experiment_id=1, session_id=1, device_id=0, event_id=181, type=23, 
+                device_time=15105.436, logged_time=24.101254831381084, time=24.101254831381084, confidence_interval=0.0, delay=0.0, 
+                filter_id=0, auto_repeated=0, scan_code=57, key_id=32, ucode=0, key=' ', modifiers=[], window_id=1049896, char=u' ', 
+                duration=0.05953043570298178, press_event_id=179), 
+                
+                KeyboardPressEventNT(experiment_id=1, session_id=1, device_id=0, 
+                event_id=185, type=22, device_time=15105.53, logged_time=24.201119747564007, time=24.201119747564007, confidence_interval=0.0, 
+                delay=0.0, filter_id=0, auto_repeated=0, scan_code=57, key_id=32, ucode=0, key=' ', modifiers=[], window_id=1049896, char=u' ', 
+                duration=0.0, press_event_id=0), 
+                
+                KeyboardReleaseEventNT(experiment_id=1, session_id=1, device_id=0, event_id=188, type=23, 
+                device_time=15105.592, logged_time=24.26133744488652, time=24.26133744488652, confidence_interval=0.0, delay=0.0, filter_id=0, 
+                auto_repeated=0, scan_code=57, key_id=32, ucode=0, key=' ', modifiers=[], window_id=1049896, char=u' ', duration=0.06021769732251414, 
+                press_event_id=185), 
+                
+                KeyboardPressEventNT(experiment_id=1, session_id=1, device_id=0, event_id=195, type=22, device_time=15105.764, 
+                logged_time=24.44114932231423, time=24.44114932231423, confidence_interval=0.0, delay=0.0, filter_id=0, auto_repeated=0, scan_code=57, 
+                key_id=32, ucode=0, key=' ', modifiers=[], window_id=1049896, char=u' ', duration=0.0, press_event_id=0)]'''
+            
+            
+            print(display.getEvents()) #empty list
+            print(tracker.getEvents()) #tracker.getEvents(event_type_id)
+            
+            '''[BinocularEyeSampleEventNT(experiment_id=1, 
+                session_id=1, device_id=0, event_id=87, type=52, device_time=211052.468, logged_time=20.073157634193194, time=211052.4679924997, 
+                confidence_interval=0.0, delay=-211032.39483486552, filter_id=1001, left_gaze_x=0, left_gaze_y=0, left_gaze_z=0, left_eye_cam_x=0,
+                left_eye_cam_y=0,
+                left_eye_cam_z=0, left_angle_x=0, left_angle_y=0, left_raw_x=0, left_raw_y=0, left_pupil_measure1=0, left_pupil_measure1_type=70, 
+                left_pupil_measure2=0, left_pupil_measure2_type=0, left_ppd_x=0, left_ppd_y=0, left_velocity_x=0, left_velocity_y=0, left_velocity_xy=0, 
+                right_gaze_x=0, right_gaze_y=0, right_gaze_z=0, right_eye_cam_x=0, right_eye_cam_y=0, right_eye_cam_z=0, right_angle_x=0, right_angle_y=0, 
+                right_raw_x=0, right_raw_y=0, right_pupil_measure1=0, right_pupil_measure1_type=70, right_pupil_measure2=0, right_pupil_measure2_type=0, 
+                right_ppd_x=0, right_ppd_y=0, right_velocity_x=0, right_velocity_y=0, right_velocity_xy=0, status=16), 
+                
+                BinocularEyeSampleEventNT(experiment_id=1, session_id=1, device_id=0, event_id=106, type=52, device_time=211053.06, 
+                logged_time=20.633184666747184, time=211053.05999328924, confidence_interval=0.0, delay=-211032.4268086225, filter_id=1001,
+                left_gaze_x=0, left_gaze_y=0, left_gaze_z=0, left_eye_cam_x=0, left_eye_cam_y=0, left_eye_cam_z=0, left_angle_x=0, 
+                left_angle_y=0, left_raw_x=0, left_raw_y=0, left_pupil_measure1=0, left_pupil_measure1_type=70, left_pupil_measure2=0, 
+                left_pupil_measure2_type=0, left_ppd_x=0, left_ppd_y=0, left_velocity_x=0, left_velocity_y=0, left_velocity_xy=0, 
+                right_gaze_x=0, right_gaze_y=0, right_gaze_z=0, right_eye_cam_x=0, right_eye_cam_y=0, right_eye_cam_z=0, right_angle_x=0,
+                right_angle_y=0, right_raw_x=0, right_raw_y=0, right_pupil_measure1=0, right_pupil_measure1_type=70, right_pupil_measure2=0,
+                right_pupil_measure2_type=0, right_ppd_x=0, right_ppd_y=0, right_velocity_x=0, right_velocity_y=0, right_velocity_xy=0, status=16)]'''
+            
+            
+            print(mouse.getEvents()) #empty list
         
         def instructions_fixation_cross(win):
 
@@ -194,31 +253,49 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             self.hub.clearEvents('all')
             
             return choice
-           
+            
+        def draw_gaze_dot(win):
+            #try to paint gaze position
+            
+            #test with eye tracker
         
-        ###########
-        #### Susa's experiment functions
-        ###########
-
+            try:
+                coord_type=display.getCoordinateType()
+                gaze_dot =visual.GratingStim(win,tex=None, mask="gauss",
+                                             pos=(0,0 ),size=(66,66),color='green',
+                                                                units=coord_type)
+                gpos=tracker.getPosition()
+                #logs_windows(gpos, 'space')
+                print(gpos, gaze_dot, coord_type, tracker)
+                gaze_dot.setPos([gpos[0],gpos[1]])
+                #imageStim.draw()
+                gaze_dot.draw()
+                win.flip()
+                key=event.waitKeys(keyList=[' ']) 
+            except Exception:
+                print('exception - None of gpos')
                 
+            return 0
         
+        #end try to paint gaze position
+           
 
         # Inform the ioDataStore that the experiment is using ac
         # TrialHandler. The ioDataStore will create a table
         # which can be used to record the actual trial variable values (DV or IV)
         # in the order run / collected.
         #
+        
         self.hub.createTrialHandlerRecordTable(trials)
 
         selected_eyetracker_name=args[0]
+        
         # Let's make some short-cuts to the devices we will be using in this 'experiment'.
         tracker=self.hub.devices.tracker
         display=self.hub.devices.display
         kb=self.hub.devices.keyboard
         mouse=self.hub.devices.mouse
         
-        
-
         # Start by running the eye tracker default setup procedure.
         tracker.runSetupProcedure()
 
@@ -247,9 +324,9 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         csv_name='Exp Results\\'+subject_id+'_Example_info'+localtime+'.csv'
         csv_experiment_output ='Exp Results\\'+subject_id+'_output'+localtime+'.csv'
         
-        print(csv_name)
+        #print(csv_name)
         cs=open(csv_name,'wb')
-        print(cs)
+        #print(cs)
         
         #define the columns 
         fieldnames = ['Subject_id', 'Decision', 'Trigger','Input of made choice']
@@ -275,6 +352,11 @@ class ExperimentRuntime(ioHubExperimentRuntime):
                             
         #show logs window message with '1', proceed with space
         logs_windows('1', 'space')
+        
+         #------------------------------------------------------------Experiment trial testing ----------------------------------------------------------------------------------------------
+        
+        
+        
 
         flip_time=win.flip()
         self.hub.sendMessageEvent(text="EXPERIMENT_START",sec_time=flip_time)
@@ -291,14 +373,21 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         self.hub.sendMessageEvent(text="Eye Tracker being Used: {0}".format(selected_eyetracker_name))
         self.hub.sendMessageEvent(text="IO_HUB EXPERIMENT_INFO END")
         
+       
+        
         #show logs window message with '2', proceed with space
         logs_windows('2', 'space')
 
-        self.hub.clearEvents('all')         # why here clear events
+        #self.hub.clearEvents('all')         # why here clear events
         
         #show logs window message with '3', proceed with space
         logs_windows('3', 'space')
+
+        trials.printAsText() #does not work
+        #tracker.getLastGazePosition()
         
+        
+
         
         for t in range(2):
             #show logs window message with '4', proceed with space
@@ -331,15 +420,6 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         # Disconnect the eye tracking device.
         
         tracker.setConnectionState(False)
-        
-        
-        flip_time=win.flip()
-        self.hub.sendMessageEvent(text="SHOW_DONE_TEXT",sec_time=flip_time)
-        print('hiii')
-        #cs.close() #another one close
-        print('hii2i')
-        
-        self.hub.clearEvents('all')
            
         # So the experiment is done, all trials have been run.
         # Clear the screen and show an 'experiment  done' message using the
@@ -347,17 +427,38 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         # (i.e. the space key was pressed)
         #
         
+        instructions_text_stim = visual.TextStim(win, text='', pos = [0,0],
+                                    height=24, color=[-1,-1,-1], colorSpace='rgb',
+                                    alignHoriz='center', alignVert='center',
+                                    wrapWidth=win.size[0]*.9)
+                                    
+        instuction_text="Press Any Key to Exit Demo"
+        instructions_text_stim.setText(instuction_text)
+        instructions_text_stim.draw()
+        
+        flip_time=win.flip()
+        self.hub.sendMessageEvent(text="SHOW_DONE_TEXT",sec_time=flip_time)
+        print('hiii', flip_time)
+        #cs.close() #another one close
+        print('hii2i')
+        
+        #self.hub.clearEvents('all')
+        
         #'experiment  done', redo using instructionScreen state
-        logs_windows("The experiment is complete. Press 'f2' to exit", 'f2')
+        #logs_windows("The experiment is complete. Press 'f2' to exit", 'f2')
         
         self.hub.sendMessageEvent(text='EXPERIMENT_COMPLETE')
         
         print('hiii3')
         tex1=eventtxt.Eventtotext()
-        print('hiii4')
+        print('hiii4', tex1)
         tex1.convertToText(exp_script_dir,subject_id,localtime)
         
-        print('hiii5')
+        print('hiii5', exp_script_dir)
+        #self.hub.clearEvents('all', exp_script_dir) 
+        
+        # MANAGER ERROR WHEN SENDING MSG:[Errno 9] Bad file descriptor
+        #Warning: TimeoutExpired, Killing ioHub Server process.
         
         
         ### End of experiment logic
