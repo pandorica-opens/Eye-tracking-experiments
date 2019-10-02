@@ -71,9 +71,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         ###########
         #### Fiona's experiment functions
         ###########
-        def to_output(subject_id, decision, trigger_value, input_decision):
-
-            global output_file_dir    
+        def to_output(subject_id, decision, trigger_value, input_decision, output_file_dir):
 
             import os.path 
 
@@ -113,10 +111,19 @@ class ExperimentRuntime(ioHubExperimentRuntime):
                         return row
                         
             return 0
+        
+        def logs_windows(log_text, log_key_to_proceed):
+
+            start_message = visual.TextStim(win, text=log_text, pos = [0,0], height=35,color=[255,255,255],colorSpace='rgb255',wrapWidth=win.size[0]*.9)
+            start_message.draw()
+            win.flip()
+            key=event.waitKeys(keyList=[log_key_to_proceed])
+            return key
 
         def instructions_blank_screen(win):
 
             inst_dir = 'Instructions\\blank_screen.jpg'
+            #maybe blank screen is just grey screen, but not white
             instr=visual.ImageStim(win,image=inst_dir, units='pix', size = (1600, 900))
             instr.draw()
             win.flip()
@@ -125,6 +132,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         def instructions_fixation_cross(win):
 
             inst_dir = 'Instructions\\fixation_cross.jpg'
+            #fixation_cross = visual.TextStim(win, text='+', pos = [0,0], height=54,color=[255,255,255],colorSpace='rgb255',wrapWidth=win.size[0]*.9)
             instr=visual.ImageStim(win,image=inst_dir, units='pix', size = (1600, 900))
             instr.draw()
             win.flip()
@@ -134,12 +142,27 @@ class ExperimentRuntime(ioHubExperimentRuntime):
 
             inst_dir = 'Instructions\\choice_decision.jpg'
             instr=visual.ImageStim(win,image=inst_dir, units='pix', size = (1600, 900))
+            #add table part here with input tables as random trials
+            
+            #make use of permutations - 'random'
+            
+            '''all possible permutations for order variable (instead of using if statment)
+        permutations={1: '0123', 2: '0132',3: '0213', 4: '0231',5:'0312' , 6: '0321',
+                      7: '1023', 8: '1032',9: '1203', 10: '1230',11: '1302',12: '1320',
+                     13:'2013', 14: '2031',15:'2103',16:'2130',17:'2301',18:'2310',
+                     19:'3012',20:'3021',21:'3102', 22:'3120',23:'3201', 24: '3210'}
+                     
+        order=permutations[con] '''
+        
             instr.draw()
             win.flip()
             key=event.waitKeys(keyList=['c', 'm']) 
             return key
     
-        def draw_trigger(win, tracker, trigger, item_number):
+        def draw_trigger(win, tracker, trigger, item_number, output_file_dir):
+            
+            global input_file_dir
+            
             choice = 0
     
             flip_time=win.flip()
@@ -152,16 +175,16 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             
             if (trigger == 1001):
                 instructions_blank_screen(win)
-                to_output(subject_id, 'doesn´t exist', trigger, input_decision)
+                to_output(subject_id, 'space (proceed)', trigger, input_decision, output_file_dir)
                 
             
             if (trigger == 2001):
                 instructions_fixation_cross(win)
-                to_output(subject_id, 'doesn´t exist', trigger, input_decision)
+                to_output(subject_id, 'space (proceed)', trigger, input_decision, output_file_dir)
                 
             if (trigger == 3001):
                 choice = instructions_choice_decision(win)
-                to_output(subject_id, choice, trigger, input_decision)
+                to_output(subject_id, choice, trigger, input_decision, output_file_dir)
                 
             
             flip_time=win.flip()
@@ -212,27 +235,8 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         mouse.setSystemCursorVisibility(False)
         event.Mouse(visible=False)
 
-        '''inst1=visual.ImageStim(win,pos=(0,0))
-        inst2=visual.ImageStim(win,pos=(0,0))
-        fixation_cross = visual.TextStim(win, text='+', pos = [0,0], height=54,color=[255,255,255],colorSpace='rgb255',wrapWidth=win.size[0]*.9)
-
-        message1 = visual.TextStim(win, text='Die Studie beginnt in Kürze.', pos = [0,0], height=35,color=[255,255,255],colorSpace='rgb255',wrapWidth=win.size[0]*.9)
-        message1_p=visual.TextStim(win, text='Bitte warten Sie auf die Entscheidung des anderen Spielers', pos = [0,0], height=35,color=[255,255,255],colorSpace='rgb255',wrapWidth=win.size[0]*.9)
-        message2_p = visual.TextStim(win, pos = [0,0], height=35,color=[255,255,255],colorSpace='rgb255',wrapWidth=win.size[0]*.9)
-        message1_r = visual.TextStim(win, text='Bitte warten Sie auf die Entscheidung des anderen Spielers.', pos = [0,0], height=35,color=[255,255,255],colorSpace='rgb255',wrapWidth=win.size[0]*.9)
-        message2_r = visual.TextStim(win, text='Bitte warten Sie auf die Entscheidung des anderen Spielers.', pos = [0,0], height=35,color=[255,255,255],colorSpace='rgb255',wrapWidth=win.size[0]*.9)
         
-        messages = [message1, message1_p, message2_p, message1_r, message2_r]
-        
-        #all possible permutations for order variable (instead of using if statment)
-        permutations={1: '0123', 2: '0132',3: '0213', 4: '0231',5:'0312' , 6: '0321',
-                      7: '1023', 8: '1032',9: '1203', 10: '1230',11: '1302',12: '1320',
-                     13:'2013', 14: '2031',15:'2103',16:'2130',17:'2301',18:'2310',
-                     19:'3012',20:'3021',21:'3102', 22:'3120',23:'3201', 24: '3210'}
-                     
-        order=permutations[con] '''
-        
-        #------------------------------------------------------------Trial Example starts ----------------------------------------------------------------------------------------------
+        #------------------------------------------------------------Experiment begins ----------------------------------------------------------------------------------------------
         
         #get time in nice format to name the csv file
         localtime=time.asctime(time.localtime(time.time()))
@@ -241,6 +245,8 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         
         #create csv file
         csv_name='Exp Results\\'+subject_id+'_Example_info'+localtime+'.csv'
+        csv_experiment_output ='Exp Results\\'+subject_id+'_output'+localtime+'.csv'
+        
         print(csv_name)
         cs=open(csv_name,'wb')
         print(cs)
@@ -263,45 +269,17 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         #example_message = visual.TextStim(win, text="Probedurchgang (dieser wird nicht relevant für Ihre spätere Auszahlung)", pos = [0,0], height=30,color=[255,255,255],colorSpace='rgb255',wrapWidth=win.size[0]*.7)
         #example_message.draw()
         
-        '''cs.close()'''
-
+        #'''cs.close()'''
         
-        #------------------------------------------------------------Trial Example ends ----------------------------------------------------------------------------------------------
-        
-        
-        
-        
-        
-        #------------------------------------------------------------Trial Logic starts ----------------------------------------------------------------------------------------------
-        
-        #get time in nice format to name the csv file
-        '''localtime=time.asctime(time.localtime(time.time()))
-        localtime=localtime[11:16]+'pm-'+localtime[4:10]
-        localtime=localtime.replace(":","_").replace(" ","_")
-        
-        #create csv file
-        csv_name='Exp Results\\'+subj_id+'_Experiment_info'+localtime+'.csv'
-        cs=open(csv_name,'wb')
-        
-        #define the columns 
-        fieldnames = ['trial','subject','partner','Role','item','Condition','A_self','A_other','B_self','B_other','Choice_A','Choice_accept']
-        writer = csv.DictWriter(cs, fieldnames=fieldnames)
-        writer.writeheader()'''
         
                             
-        #show experiment_begins message
-        start_message = visual.TextStim(win, text="1", pos = [0,0], height=35,color=[255,255,255],colorSpace='rgb255',wrapWidth=win.size[0]*.9)
-        start_message.draw()
-        win.flip()
-        key=event.waitKeys(keyList=['space'])
-        
-        
-    
+        #show logs window message with '1', proceed with space
+        logs_windows('1', 'space')
+
         flip_time=win.flip()
         self.hub.sendMessageEvent(text="EXPERIMENT_START",sec_time=flip_time)
         self.hub.clearEvents('all')
     
-        
         # Send some information to the ioHub DataStore as experiment messages
         # including the eye tracker being used for this session.
         #
@@ -313,63 +291,39 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         self.hub.sendMessageEvent(text="Eye Tracker being Used: {0}".format(selected_eyetracker_name))
         self.hub.sendMessageEvent(text="IO_HUB EXPERIMENT_INFO END")
         
-        start_message = visual.TextStim(win, text="2", pos = [0,0], height=35,color=[255,255,255],colorSpace='rgb255',wrapWidth=win.size[0]*.9)
-        start_message.draw()
-        win.flip()
-        key=event.waitKeys(keyList=['space'])
+        #show logs window message with '2', proceed with space
+        logs_windows('2', 'space')
 
-        self.hub.clearEvents('all')        
+        self.hub.clearEvents('all')         # why here clear events
         
-        #cs.close()
+        #show logs window message with '3', proceed with space
+        logs_windows('3', 'space')
         
-       
-        #------------------------------------------------------------Trial Logic ends ----------------------------------------------------------------------------------------------
-        
-        #------------------------------------------------------------Experiment begins ----------------------------------------------------------------------------------------------
-        
-        
-        start_message = visual.TextStim(win, text="3", pos = [0,0], height=35,color=[255,255,255],colorSpace='rgb255',wrapWidth=win.size[0]*.9)
-        start_message.draw()
-        win.flip()
-        key=event.waitKeys(keyList=['space'])
         
         for t in range(2):
-            start_message = visual.TextStim(win, text="4", pos = [0,0], height=35,color=[255,255,255],colorSpace='rgb255',wrapWidth=win.size[0]*.9)
-            start_message.draw()
-            win.flip()
-            key=event.waitKeys(keyList=['space'])
+            #show logs window message with '4', proceed with space
+            logs_windows('4', 'space')
             
             trigger_value=1001
-            draw_trigger(win, tracker, trigger_value, t+1)
+            draw_trigger(win, tracker, trigger_value, t+2,csv_experiment_output) #the row indexing starts from 2
             
-            start_message = visual.TextStim(win, text="5", pos = [0,0], height=35,color=[255,255,255],colorSpace='rgb255',wrapWidth=win.size[0]*.9)
-            start_message.draw()
-            win.flip()
-            key=event.waitKeys(keyList=['space'])
+            #show logs window message with '5', proceed with space
+            logs_windows('5', 'space')
             
             trigger_value=2001
-            draw_trigger(win, tracker, trigger_value, t+1)
+            draw_trigger(win, tracker, trigger_value, t+2, csv_experiment_output)
             
-            start_message = visual.TextStim(win, text="6", pos = [0,0], height=35,color=[255,255,255],colorSpace='rgb255',wrapWidth=win.size[0]*.9)
-            start_message.draw()
-            win.flip()
-            key=event.waitKeys(keyList=['space'])
-
+            #show logs window message with '6', proceed with space
+            logs_windows('6', 'space')
             
             trigger_value=3001
-            draw_trigger(win, tracker, trigger_value, t+1)
+            draw_trigger(win, tracker, trigger_value, t+2, csv_experiment_output)
             
-            start_message = visual.TextStim(win, text="7", pos = [0,0], height=35,color=[255,255,255],colorSpace='rgb255',wrapWidth=win.size[0]*.9)
-            start_message.draw()
-            win.flip()
-            key=event.waitKeys(keyList=['space'])
+            #show logs window message with '7', proceed with space
+            logs_windows('7', 'space')
 
-
-        start_message = visual.TextStim(win, text="8", pos = [0,0], height=35,color=[255,255,255],colorSpace='rgb255',wrapWidth=win.size[0]*.9)
-        start_message.draw()
-        win.flip()
-        key=event.waitKeys(keyList=['space'])
-        
+        #show logs window message with '8', proceed with space
+        logs_windows('8', 'space')
         print('after 8')
 
         #------------------------------------------------------------Experiment ends ----------------------------------------------------------------------------------------------
@@ -392,6 +346,10 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         # instructionScreen state. What for the trigger to exit that state.
         # (i.e. the space key was pressed)
         #
+        
+        #'experiment  done', redo using instructionScreen state
+        logs_windows("The experiment is complete. Press 'f2' to exit", 'f2')
+        
         self.hub.sendMessageEvent(text='EXPERIMENT_COMPLETE')
         
         print('hiii3')
@@ -400,8 +358,6 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         tex1.convertToText(exp_script_dir,subject_id,localtime)
         
         print('hiii5')
-        
-        event.waitKeys(keyList=['f2'])
         
         
         ### End of experiment logic
