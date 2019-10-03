@@ -27,6 +27,7 @@ import eventtxt
 import subprocess
 import time
 import math
+import numpy as np
 
 
 subject_id='-1'
@@ -96,6 +97,14 @@ class ExperimentRuntime(ioHubExperimentRuntime):
                 
                 writer.writerows([[subject_id, decision, trigger_value, input_decision]])
                 
+        def row_to_condition(row, condition_index):
+            txt=row [0]
+            #array_column_names 
+            print(txt.split(';'))
+            a = np.empty(len(txt.split(';')))
+            a = txt.split(';')
+            print('a[condition index: ','condition index=', condition_index, a[condition_index])
+                
         def read_input_file(csv_dir, item_number):
     
             global subject_id
@@ -108,10 +117,55 @@ class ExperimentRuntime(ioHubExperimentRuntime):
                 for row in spamreader:
                     i=i+1
                     if (i==item_number):
-                        #print(subject_id, row, str(subject_id))
+                        print('row', row)
                         return row
                         
             return 0
+            
+        def monitor_coordinate_check(win):
+            for i in range(90):
+                
+                
+                texti = str(-450+10*i)
+                
+                pixel_line_y = visual.ShapeStim(win, units='pix', lineWidth=1.5,lineColor=(55,255,255),lineColorSpace='rgb255', vertices=((-750, -450+10*i),(750, -450+10*i)),closeShape=False, pos=(0, 0), size=1.2)
+                pixel_name_y = visual.TextStim(win, text='y='+texti, height=10, units='pix', pos = [0,-450+10*i],color=[255,55,255],colorSpace='rgb255')
+                
+                texti = str(-800+i*20)
+                
+                pixel_line_x = visual.ShapeStim(win, units='pix', lineWidth=1.5,lineColor=(155,255,55),lineColorSpace='rgb255', vertices=((-800+i*20, -450),(-800+i*20, 450)),closeShape=False, pos=(0, 0), size=1) #what size param
+                pixel_name_x = visual.TextStim(win, text=texti, height=9, units='pix', pos = [-800+i*20,0],color=[255,55,55],colorSpace='rgb255')
+                
+                pixel_line_x.draw()
+                pixel_line_y.draw()
+                pixel_name_x.draw()
+                pixel_name_y.draw()
+            
+           
+            win.flip()
+            
+        def draw_input(item_array_text, item_array_x, item_array_y):
+            
+            for i in range(len(item_array_x)):
+                print(item_array_x[i], item_array_y[i])
+                whitebox = visual.ShapeStim(win, units='pix', lineWidth=1.5,
+                                            lineColor=(255,255,255),lineColorSpace='rgb255', 
+                                            vertices=((item_array_x[i]+20, item_array_y[i]+20),
+                                            (item_array_x[i]+20, item_array_y[i]-20),
+                                            (item_array_x[i]-20, item_array_y[i]-20),
+                                            (item_array_x[i]-20, item_array_y[i]+20)),
+                                            closeShape=True, 
+                                            fillColor = (255,255,255), fillColorSpace='rgb255',
+                                            pos=(0, 0), size=1) #what size param
+                whitebox.draw()
+                
+                item_value = visual.TextStim(win, text=item_array_text[i], height=21, units='pix', 
+                pos = [item_array_x[i],item_array_y[i]],color=[0,0,0],colorSpace='rgb255')
+                
+                item_value.draw()
+                
+            win.flip()
+            
         
         def logs_windows(log_text, log_key_to_proceed):
 
@@ -130,8 +184,8 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             win.flip()
             key=event.waitKeys(keyList=['space'])
             #print(event.id)
-            print(tracker.getPosition()) #tracker - get position = none
-            print(kb.getEvents())  #kb.getEvents(event_type_id)
+            #print(tracker.getPosition()) #tracker - get position = none
+            #print(kb.getEvents())  #kb.getEvents(event_type_id)
             
             '''KeyboardReleaseEventNT(experiment_id=1, session_id=1, device_id=0, 
                 event_id=175, type=23, device_time=15105.28, logged_time=23.941098399425755, time=23.941098399425755, 
@@ -163,8 +217,8 @@ class ExperimentRuntime(ioHubExperimentRuntime):
                 key_id=32, ucode=0, key=' ', modifiers=[], window_id=1049896, char=u' ', duration=0.0, press_event_id=0)]'''
             
             
-            print(display.getEvents()) #empty list
-            print(tracker.getEvents()) #tracker.getEvents(event_type_id)
+            #print(display.getEvents()) #empty list
+            #print(tracker.getEvents()) #tracker.getEvents(event_type_id)
             
             '''[BinocularEyeSampleEventNT(experiment_id=1, 
                 session_id=1, device_id=0, event_id=87, type=52, device_time=211052.468, logged_time=20.073157634193194, time=211052.4679924997, 
@@ -186,35 +240,38 @@ class ExperimentRuntime(ioHubExperimentRuntime):
                 right_pupil_measure2_type=0, right_ppd_x=0, right_ppd_y=0, right_velocity_x=0, right_velocity_y=0, right_velocity_xy=0, status=16)]'''
             
             
-            print(mouse.getEvents()) #empty list
+            #print(mouse.getEvents()) #empty list
         
         def instructions_fixation_cross(win):
 
             inst_dir = 'Instructions\\fixation_cross.jpg'
-            #fixation_cross = visual.TextStim(win, text='+', pos = [0,0], height=54,color=[255,255,255],colorSpace='rgb255',wrapWidth=win.size[0]*.9)
             instr=visual.ImageStim(win,image=inst_dir, units='pix', size = (1600, 900))
             instr.draw()
-            win.flip()
+            
+            fixation_cross = visual.TextStim(win, text='+', pos = [-595,345], height=54,color=[55,255,255],colorSpace='rgb255')
+            fixation_cross.draw()
+            
+            #monitor_coordinate_check(win)
+            win.flip() #comment in case of monitor coordinate check
             key=event.waitKeys(keyList=['space']) 
             
         def instructions_choice_decision(win):
+            
+            item_list_text = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
+            item_array_x = np.array([-15, -15, -15, -15,-15, -15, 445, 445, 445, 445, 445, 455])
+            item_array_y = np.array([215,105,-5,-115,-225,-325,215,105,-5,-115,-225,-325])
 
             inst_dir = 'Instructions\\choice_decision.jpg'
             instr=visual.ImageStim(win,image=inst_dir, units='pix', size = (1600, 900))
             #add table part here with input tables as random trials
             
-            #make use of permutations - 'random'
-            
-            '''all possible permutations for order variable (instead of using if statment)
-        permutations={1: '0123', 2: '0132',3: '0213', 4: '0231',5:'0312' , 6: '0321',
-                      7: '1023', 8: '1032',9: '1203', 10: '1230',11: '1302',12: '1320',
-                     13:'2013', 14: '2031',15:'2103',16:'2130',17:'2301',18:'2310',
-                     19:'3012',20:'3021',21:'3102', 22:'3120',23:'3201', 24: '3210'}
-                     
-        order=permutations[con] '''
-        
+            #monitor is 1600 (-800, 800) to 900 (-450, 450)
+
             instr.draw()
-            win.flip()
+            
+            draw_input(item_list_text, item_array_x, item_array_y)
+            #monitor_coordinate_check(win)
+            
             key=event.waitKeys(keyList=['c', 'm']) 
             return key
     
@@ -230,20 +287,26 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             tracker.setRecordingState(True)
             
             tracker.setTriggerValue(trigger)
-            input_decision = read_input_file(input_file_dir, item_number)
+            input_to_make_decision = read_input_file(input_file_dir, item_number)
+            
+            
+            #input_to_make_decision_column = read_input_file(input_file_dir, 0)
+            #for i in range(len(input_to_make_decision))
+            #row_to_condition(input_to_make_decision, i)
+            #row_to_condition(input_to_make_decision, i)
             
             if (trigger == 1001):
                 instructions_blank_screen(win)
-                to_output(subject_id, 'space (proceed)', trigger, input_decision, output_file_dir)
+                to_output(subject_id, 'space (proceed)', trigger, input_to_make_decision, output_file_dir)
                 
             
             if (trigger == 2001):
                 instructions_fixation_cross(win)
-                to_output(subject_id, 'space (proceed)', trigger, input_decision, output_file_dir)
+                to_output(subject_id, 'space (proceed)', trigger, input_to_make_decision, output_file_dir)
                 
             if (trigger == 3001):
                 choice = instructions_choice_decision(win)
-                to_output(subject_id, choice, trigger, input_decision, output_file_dir)
+                to_output(subject_id, choice, trigger, input_to_make_decision, output_file_dir)
                 
             
             flip_time=win.flip()
@@ -266,7 +329,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
                                                                 units=coord_type)
                 gpos=tracker.getPosition()
                 #logs_windows(gpos, 'space')
-                print(gpos, gaze_dot, coord_type, tracker)
+                #print(gpos, gaze_dot, coord_type, tracker)
                 gaze_dot.setPos([gpos[0],gpos[1]])
                 #imageStim.draw()
                 gaze_dot.draw()
@@ -389,24 +452,27 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         
 
         
-        for t in range(2):
+        item_number = random.randrange(2, 11, 1)
+        print(item_number)
+        
+        for t in range(1):
             #show logs window message with '4', proceed with space
             logs_windows('4', 'space')
             
             trigger_value=1001
-            draw_trigger(win, tracker, trigger_value, t+2,csv_experiment_output) #the row indexing starts from 2
+            draw_trigger(win, tracker, trigger_value, item_number,csv_experiment_output) #the row indexing starts from 2
             
             #show logs window message with '5', proceed with space
             logs_windows('5', 'space')
             
             trigger_value=2001
-            draw_trigger(win, tracker, trigger_value, t+2, csv_experiment_output)
+            draw_trigger(win, tracker, trigger_value, item_number, csv_experiment_output)
             
             #show logs window message with '6', proceed with space
             logs_windows('6', 'space')
             
             trigger_value=3001
-            draw_trigger(win, tracker, trigger_value, t+2, csv_experiment_output)
+            draw_trigger(win, tracker, trigger_value, item_number, csv_experiment_output)
             
             #show logs window message with '7', proceed with space
             logs_windows('7', 'space')
