@@ -258,8 +258,8 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         def instructions_choice_decision(win):
             
             item_list_text = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
-            item_array_x = np.array([-15, -15, -15, -15,-15, -15, 445, 445, 445, 445, 445, 455])
-            item_array_y = np.array([215,105,-5,-115,-225,-325,215,105,-5,-115,-225,-325])
+            item_array_x = np.array([-15, -15, -15, -15,-15, -15, 445, 445, 445, 445, 445, 445])
+            item_array_y = np.array([215,105,-5,-115,-225,-335,215,105,-5,-115,-225,-335])
 
             inst_dir = 'Instructions\\choice_decision.jpg'
             instr=visual.ImageStim(win,image=inst_dir, units='pix', size = (1600, 900))
