@@ -35,7 +35,7 @@ con=1
 calibration_failed = 0
 
 input_file_dir = 'input.csv'
-output_file_dir = 'Exp Results\\output.csv'
+#output_file_dir = 'Exp Results\\output.csv'
 logfile = logging.LogFile(f= 'Error Results.txt', level = 30, filemode = 'a', logger = None, encoding = 'utf8') #not working
 
 
@@ -96,6 +96,30 @@ class ExperimentRuntime(ioHubExperimentRuntime):
                     writer.writerows([output_data_headers])
                 
                 writer.writerows([[subject_id, decision, trigger_value, input_decision]])
+                
+        def to_output_eyetracking(subject_id, x, y, gazetime, trigger, output_eye_file_dir):
+
+            import os.path 
+
+            is_exist = False
+            if os.path.exists(output_eye_file_dir): is_exist = True
+
+            # Add header to the output file if it is the first time to write to it...
+            if not is_exist:    
+                output_data_headers = ['Subject_id', 'x', 'y', 'gazetime', 'Trigger']
+                      
+
+            # Python 2
+            with open(output_eye_file_dir, 'ab') as f:
+
+            # Python 3
+            #with open(output_file_dir, 'a', newline = '') as f:
+
+                writer = csv.writer(f)
+                if not is_exist:
+                    writer.writerows([output_data_headers])
+                
+                writer.writerows([[subject_id, x, y, gazetime, trigger]])
                 
         def row_to_condition(row, condition_index):
             txt=row [0]
@@ -275,7 +299,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             key=event.waitKeys(keyList=['c', 'm']) 
             return key
     
-        def draw_trigger(win, tracker, trigger, item_number, output_file_dir):
+        def draw_trigger(win, tracker, trigger, item_number, output_file_dir, output_eye_dir):
             
             global input_file_dir
             
@@ -284,10 +308,13 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             flip_time=win.flip()
             self.hub.sendMessageEvent(text="TRIAL_START",sec_time=flip_time)
             self.hub.clearEvents('all')
-            tracker.setRecordingState(True)
+            tracker.setRecordingState(True) #setting it every time here - why
             
             tracker.setTriggerValue(trigger)
             input_to_make_decision = read_input_file(input_file_dir, item_number)
+            
+            #change x,y, gazetime while testing with eyetribe
+            x,y,gazetime = 10, 20, 30
             
             
             #input_to_make_decision_column = read_input_file(input_file_dir, 0)
@@ -298,15 +325,18 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             if (trigger == 1001):
                 instructions_blank_screen(win)
                 to_output(subject_id, 'space (proceed)', trigger, input_to_make_decision, output_file_dir)
+                to_output_eyetracking(subject_id, x, y, gazetime, trigger, output_eye_dir)
                 
             
             if (trigger == 2001):
                 instructions_fixation_cross(win)
                 to_output(subject_id, 'space (proceed)', trigger, input_to_make_decision, output_file_dir)
+                to_output_eyetracking(subject_id, x, y, gazetime, trigger, output_eye_dir)
                 
             if (trigger == 3001):
                 choice = instructions_choice_decision(win)
                 to_output(subject_id, choice, trigger, input_to_make_decision, output_file_dir)
+                to_output_eyetracking(subject_id, x, y, gazetime, trigger, output_eye_dir)
                 
             
             flip_time=win.flip()
@@ -347,9 +377,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         # TrialHandler. The ioDataStore will create a table
         # which can be used to record the actual trial variable values (DV or IV)
         # in the order run / collected.
-        #
-        
-        #self.hub.createTrialHandlerRecordTable(trials)
+
 
         selected_eyetracker_name=args[0]
         
@@ -384,17 +412,9 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         localtime=localtime.replace(":","_").replace(" ","_")
         
         #create csv file
-        csv_name='Exp Results\\'+subject_id+'_Example_info'+localtime+'.csv'
-        csv_experiment_output ='Exp Results\\'+subject_id+'_output'+localtime+'.csv'
+        csv_eye_output='Exp Results\\'+subject_id+'_eyetracking_output'+localtime+'.csv'
+        csv_experiment_output ='Exp Results\\'+subject_id+'_decision_output'+localtime+'.csv'
         
-        #print(csv_name)
-        cs=open(csv_name,'wb')
-        #print(cs)
-        
-        #define the columns 
-        fieldnames = ['Subject_id', 'Decision', 'Trigger','Input of made choice']
-        writer = csv.DictWriter(cs, fieldnames=fieldnames)
-        writer.writeheader()
         
         #variables
         inst1=visual.ImageStim(win,pos=(0,0))
@@ -460,19 +480,19 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             logs_windows('4', 'space')
             
             trigger_value=1001
-            draw_trigger(win, tracker, trigger_value, item_number,csv_experiment_output) #the row indexing starts from 2
+            draw_trigger(win, tracker, trigger_value, item_number,csv_experiment_output, csv_eye_output) #the row indexing starts from 2
             
             #show logs window message with '5', proceed with space
             logs_windows('5', 'space')
             
             trigger_value=2001
-            draw_trigger(win, tracker, trigger_value, item_number, csv_experiment_output)
+            draw_trigger(win, tracker, trigger_value, item_number, csv_experiment_output, csv_eye_output)
             
             #show logs window message with '6', proceed with space
             logs_windows('6', 'space')
             
             trigger_value=3001
-            draw_trigger(win, tracker, trigger_value, item_number, csv_experiment_output)
+            draw_trigger(win, tracker, trigger_value, item_number, csv_experiment_output, csv_eye_output)
             
             #show logs window message with '7', proceed with space
             logs_windows('7', 'space')
