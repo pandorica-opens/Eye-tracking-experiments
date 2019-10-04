@@ -121,13 +121,14 @@ class ExperimentRuntime(ioHubExperimentRuntime):
                 
                 writer.writerows([[subject_id, x, y, gazetime, trigger]])
                 
-        def row_to_condition(row, condition_index):
-            txt=row [0]
+        def row_to_condition(row):
+            txt=row
             #array_column_names 
             print(txt.split(';'))
             a = np.empty(len(txt.split(';')))
             a = txt.split(';')
-            print('a[condition index: ','condition index=', condition_index, a[condition_index])
+            print('a', a)
+            return a
                 
         def read_input_file(csv_dir, item_number):
     
@@ -169,9 +170,10 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             win.flip()
             
         def draw_input(item_array_text, item_array_x, item_array_y):
+
             
             for i in range(len(item_array_x)):
-                print(item_array_x[i], item_array_y[i])
+                print(item_array_x[i], item_array_y[i], i, len(item_array_x), len(item_array_text), item_array_text)
                 whitebox = visual.ShapeStim(win, units='pix', lineWidth=1.5,
                                             lineColor=(255,255,255),lineColorSpace='rgb255', 
                                             vertices=((item_array_x[i]+20, item_array_y[i]+20),
@@ -183,7 +185,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
                                             pos=(0, 0), size=1) #what size param
                 whitebox.draw()
                 
-                item_value = visual.TextStim(win, text=item_array_text[i], height=21, units='pix', 
+                item_value = visual.TextStim(win, text=item_array_text[i+1], height=21, units='pix', #here we use i+1 because the first number is numbers item
                 pos = [item_array_x[i],item_array_y[i]],color=[0,0,0],colorSpace='rgb255')
                 
                 item_value.draw()
@@ -279,9 +281,9 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             win.flip() #comment in case of monitor coordinate check
             key=event.waitKeys(keyList=['space']) 
             
-        def instructions_choice_decision(win):
+        def instructions_choice_decision(win, item_list_text):
             
-            item_list_text = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
+            #item_list_text = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
             item_array_x = np.array([-15, -15, -15, -15,-15, -15, 445, 445, 445, 445, 445, 445])
             item_array_y = np.array([215,105,-5,-115,-225,-335,215,105,-5,-115,-225,-335])
 
@@ -312,29 +314,29 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             
             tracker.setTriggerValue(trigger)
             input_to_make_decision = read_input_file(input_file_dir, item_number)
+            #print(input_to_make_decision, type(input_to_make_decision), ''.join(input_to_make_decision))
+            
+            input_to_make_decision_split = ''.join(input_to_make_decision)
+            input_to_make_decision_split = row_to_condition(input_to_make_decision_split)
+            #print(input_to_make_decision_split)
             
             #change x,y, gazetime while testing with eyetribe
             x,y,gazetime = 10, 20, 30
-            
-            
-            #input_to_make_decision_column = read_input_file(input_file_dir, 0)
-            #for i in range(len(input_to_make_decision))
-            #row_to_condition(input_to_make_decision, i)
-            #row_to_condition(input_to_make_decision, i)
+
             
             if (trigger == 1001):
                 instructions_blank_screen(win)
-                to_output(subject_id, 'space (proceed)', trigger, input_to_make_decision, output_file_dir)
+                to_output(subject_id, 'space', trigger, input_to_make_decision, output_file_dir)
                 to_output_eyetracking(subject_id, x, y, gazetime, trigger, output_eye_dir)
                 
             
             if (trigger == 2001):
                 instructions_fixation_cross(win)
-                to_output(subject_id, 'space (proceed)', trigger, input_to_make_decision, output_file_dir)
+                to_output(subject_id, 'space', trigger, input_to_make_decision, output_file_dir)
                 to_output_eyetracking(subject_id, x, y, gazetime, trigger, output_eye_dir)
                 
             if (trigger == 3001):
-                choice = instructions_choice_decision(win)
+                choice = instructions_choice_decision(win, input_to_make_decision_split)
                 to_output(subject_id, choice, trigger, input_to_make_decision, output_file_dir)
                 to_output_eyetracking(subject_id, x, y, gazetime, trigger, output_eye_dir)
                 
@@ -368,16 +370,10 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             except Exception:
                 print('exception - None of gpos')
                 
+                #end try to paint gaze position
+                
             return 0
         
-        #end try to paint gaze position
-           
-
-        # Inform the ioDataStore that the experiment is using ac
-        # TrialHandler. The ioDataStore will create a table
-        # which can be used to record the actual trial variable values (DV or IV)
-        # in the order run / collected.
-
 
         selected_eyetracker_name=args[0]
         
@@ -419,28 +415,17 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         #variables
         inst1=visual.ImageStim(win,pos=(0,0))
         
-        #draw instruction
+        #draw instruction (1)
         inst1.image = 'Instructions\Inst.png'
         inst1.draw()
         win.flip()
         key=event.waitKeys(keyList=['space'])
-        
-        #show example message
-        #example_message = visual.TextStim(win, text="Probedurchgang (dieser wird nicht relevant für Ihre spätere Auszahlung)", pos = [0,0], height=30,color=[255,255,255],colorSpace='rgb255',wrapWidth=win.size[0]*.7)
-        #example_message.draw()
-        
-        #'''cs.close()'''
-        
-        
                             
         #show logs window message with '1', proceed with space
-        logs_windows('1', 'space')
+        #logs_windows('1', 'space')
         
          #------------------------------------------------------------Experiment trial testing ----------------------------------------------------------------------------------------------
         
-        
-        
-
         flip_time=win.flip()
         self.hub.sendMessageEvent(text="EXPERIMENT_START",sec_time=flip_time)
         self.hub.clearEvents('all')
@@ -457,49 +442,47 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         self.hub.sendMessageEvent(text="IO_HUB EXPERIMENT_INFO END")
         
        
-        
         #show logs window message with '2', proceed with space
-        logs_windows('2', 'space')
+        #logs_windows('2', 'space')
 
         #self.hub.clearEvents('all')         # why here clear events
         
         #show logs window message with '3', proceed with space
-        logs_windows('3', 'space')
+        #logs_windows('3', 'space')
 
         #trials.printAsText() #does not work
         #tracker.getLastGazePosition()
         
         
-
-        
-        item_number = random.randrange(2, 11, 1)
-        print(item_number)
-        
-        for t in range(1):
+        for t in range(5): #number of trials is 10
+            
+            item_number = random.randrange(2, 11, 1)
+            print(item_number)
+            
             #show logs window message with '4', proceed with space
-            logs_windows('4', 'space')
+            #logs_windows('4', 'space')
             
             trigger_value=1001
             draw_trigger(win, tracker, trigger_value, item_number,csv_experiment_output, csv_eye_output) #the row indexing starts from 2
             
             #show logs window message with '5', proceed with space
-            logs_windows('5', 'space')
+            #logs_windows('5', 'space')
             
             trigger_value=2001
             draw_trigger(win, tracker, trigger_value, item_number, csv_experiment_output, csv_eye_output)
             
             #show logs window message with '6', proceed with space
-            logs_windows('6', 'space')
+            #logs_windows('6', 'space')
             
             trigger_value=3001
             draw_trigger(win, tracker, trigger_value, item_number, csv_experiment_output, csv_eye_output)
             
             #show logs window message with '7', proceed with space
-            logs_windows('7', 'space')
+            #logs_windows('7', 'space')
 
         #show logs window message with '8', proceed with space
-        logs_windows('8', 'space')
-        print('after 8')
+        #logs_windows('8', 'space')
+        #print('after 8')
 
         #------------------------------------------------------------Experiment ends ----------------------------------------------------------------------------------------------
 
@@ -524,9 +507,9 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         
         flip_time=win.flip()
         self.hub.sendMessageEvent(text="SHOW_DONE_TEXT",sec_time=flip_time)
-        print('hiii', flip_time)
+        #print('hiii', flip_time)
         #cs.close() #another one close
-        print('hii2i')
+        #print('hii2i')
         
         #self.hub.clearEvents('all')
         
@@ -535,12 +518,12 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         
         self.hub.sendMessageEvent(text='EXPERIMENT_COMPLETE')
         
-        print('hiii3')
+        #print('hiii3')
         tex1=eventtxt.Eventtotext()
-        print('hiii4', tex1)
+        #print('hiii4', tex1)
         tex1.convertToText(exp_script_dir,subject_id,localtime)
         
-        print('hiii5', exp_script_dir)
+        #print('hiii5', exp_script_dir)
         #self.hub.clearEvents('all', exp_script_dir) 
         
         # MANAGER ERROR WHEN SENDING MSG:[Errno 9] Bad file descriptor
