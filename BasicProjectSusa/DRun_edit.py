@@ -11,7 +11,8 @@ Eye Tracker hardware used.
 
 Inital Version: May 6th, 2013, Sol Simpson
 """
-from psychopy import visual, event,core, logging
+from psychopy import visual, event, core, logging
+from psychopy.core import getTime, wait 
 from psychopy.data import importConditions #TrialHandler,
 from psychopy.iohub import (EventConstants, EyeTrackerConstants,
                             getCurrentDateTimeString, ioHubExperimentRuntime)
@@ -127,7 +128,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             print(txt.split(';'))
             a = np.empty(len(txt.split(';')))
             a = txt.split(';')
-            print('a', a)
+            #print('a', a)
             return a
                 
         def read_input_file(csv_dir, item_number):
@@ -142,7 +143,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
                 for row in spamreader:
                     i=i+1
                     if (i==item_number):
-                        print('row', row)
+                        #print('row', row)
                         return row
                         
             return 0
@@ -173,7 +174,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
 
             
             for i in range(len(item_array_x)):
-                print(item_array_x[i], item_array_y[i], i, len(item_array_x), len(item_array_text), item_array_text)
+                #print(item_array_x[i], item_array_y[i], i, len(item_array_x), len(item_array_text), item_array_text)
                 whitebox = visual.ShapeStim(win, units='pix', lineWidth=1.5,
                                             lineColor=(255,255,255),lineColorSpace='rgb255', 
                                             vertices=((item_array_x[i]+20, item_array_y[i]+20),
@@ -210,9 +211,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             #instr.autoDraw = True
             instr.draw()
             win.flip()
-            core.wait(0.2)
-            key=event.waitKeys(keyList=['space'])
-            core.wait(0.2)
+            core.wait(0.5)
             #print(event.id)
             #print(tracker.getPosition()) #tracker - get position = none
             #print(kb.getEvents())  #kb.getEvents(event_type_id)
@@ -276,14 +275,14 @@ class ExperimentRuntime(ioHubExperimentRuntime):
 
             inst_dir = 'Instructions\\fixation_cross.jpg'
             instr=visual.ImageStim(win,image=inst_dir, units='pix', size = (1600, 900))
-            instr.draw()
+            #instr.draw()
             
-            fixation_cross = visual.TextStim(win, text='+', pos = [-595,345], height=54,color=[55,255,255],colorSpace='rgb255')
+            fixation_cross = visual.TextStim(win, text='+', pos = [-595,345], height=54,color=[-1,-1,-1],colorSpace='rgb')
             fixation_cross.draw()
             
             #monitor_coordinate_check(win)
             win.flip() #comment in case of monitor coordinate check
-            key=event.waitKeys(keyList=['space']) 
+            core.wait(0.5)
             
         def instructions_choice_decision(win, item_list_text):
             
@@ -365,7 +364,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
                                                                 units=coord_type)
                 gpos=tracker.getPosition()
                 #logs_windows(gpos, 'space')
-                #print(gpos, gaze_dot, coord_type, tracker)
+                print('gpos, gaze_dot, coord_type, tracker', gpos, gaze_dot, coord_type, tracker)
                 gaze_dot.setPos([gpos[0],gpos[1]])
                 #imageStim.draw()
                 gaze_dot.draw()
@@ -397,7 +396,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
        
         # it is recommended to use pixle as unit espically if you are using eye tracker, because the eyetracker returns the readings in pixel
         win=visual.Window(display_resolution,monitor=display.getPsychopyMonitorName(),units='pix',fullscr=True,screen= display.getIndex(),
-        waitBlanking=True, color="white")
+        waitBlanking=False, color="white")
         
         # Hide the 'system mouse cursor'.
         # would need it for later
@@ -417,10 +416,24 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         csv_experiment_output ='Exp Results\\'+subject_id+'_decision_output'+localtime+'.csv'
         
         
-        #variables
-        #inst1=visual.ImageStim(win,pos=(0,0))
+        tracker.setRecordingState(True)
         
+        stime = getTime()
+
+        
+        while getTime()-stime < 100.0:
+            if (tracker.getPosition() != None):
+                print('get position for 5 seconds', tracker.getPosition())
+                gpos = tracker.getPosition()
+                start_message = visual.TextStim(win, text=str(gpos), pos = [gpos[0],gpos[1]], height=35,color=[-1,-1,-1],colorSpace='rgb',wrapWidth=win.size[0]*.9)
+                start_message.draw()
+                
+                #start_message = visual.TextStim(win, text=str(gpos), pos = [gpos[1],gpos[0]], height=35,color=[-1,-1,-1],colorSpace='rgb',wrapWidth=win.size[0]*.9)
+                #start_message.draw()
+                win.flip()
+                core.wait(0.2)
         #draw instruction (1)
+        
         #inst1.image = 'Instructions\Inst.png'
         inst1 = visual.TextStim(win, text='Instruction', pos = [0,0],
                                     height=24, color=[-1,-1,-1], colorSpace='rgb',
@@ -464,10 +477,10 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         #tracker.getLastGazePosition()
         
         
-        for t in range(5): #number of trials is 10
+        for t in range(2): #number of trials is 10
             
             item_number = random.randrange(2, 11, 1)
-            print(item_number)
+            #print(item_number)
             
             #show logs window message with '4', proceed with space
             #logs_windows('4', 'space')
@@ -486,6 +499,9 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             
             trigger_value=3001
             draw_trigger(win, tracker, trigger_value, item_number, csv_experiment_output, csv_eye_output)
+            
+            #draw_gaze_dot(win)
+            
             
             #show logs window message with '7', proceed with space
             #logs_windows('7', 'space')
@@ -613,7 +629,7 @@ if __name__ == "__main__":
             point_counter=0
             
             accepted = True
-            '''while True:
+            while True:
                 line=p.stdout.readline()
                 
                 print line
@@ -653,7 +669,7 @@ if __name__ == "__main__":
                 if fails_counter == 3: 
                     global calibration_failed
                     calibration_failed = 1
-                    break '''      
+                    break 
         
         base_config_file=os.path.normcase(os.path.join(configurationDirectory,
                                                        'iohub_config.yaml.part'))
