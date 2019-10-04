@@ -198,6 +198,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             start_message = visual.TextStim(win, text=log_text, pos = [0,0], height=35,color=[255,255,255],colorSpace='rgb255',wrapWidth=win.size[0]*.9)
             start_message.draw()
             win.flip()
+            core.wait(0.2)
             key=event.waitKeys(keyList=[log_key_to_proceed])
             return key
 
@@ -206,9 +207,12 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             inst_dir = 'Instructions\\blank_screen.jpg'
             #maybe blank screen is just grey screen, but not white
             instr=visual.ImageStim(win,image=inst_dir, units='pix', size = (1600, 900))
+            #instr.autoDraw = True
             instr.draw()
             win.flip()
+            core.wait(0.2)
             key=event.waitKeys(keyList=['space'])
+            core.wait(0.2)
             #print(event.id)
             #print(tracker.getPosition()) #tracker - get position = none
             #print(kb.getEvents())  #kb.getEvents(event_type_id)
@@ -392,7 +396,8 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         
        
         # it is recommended to use pixle as unit espically if you are using eye tracker, because the eyetracker returns the readings in pixel
-        win=visual.Window(display_resolution,monitor=display.getPsychopyMonitorName(),units='pix',fullscr=True,screen= display.getIndex())
+        win=visual.Window(display_resolution,monitor=display.getPsychopyMonitorName(),units='pix',fullscr=True,screen= display.getIndex(),
+        waitBlanking=True, color="white")
         
         # Hide the 'system mouse cursor'.
         # would need it for later
@@ -413,13 +418,18 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         
         
         #variables
-        inst1=visual.ImageStim(win,pos=(0,0))
+        #inst1=visual.ImageStim(win,pos=(0,0))
         
         #draw instruction (1)
-        inst1.image = 'Instructions\Inst.png'
+        #inst1.image = 'Instructions\Inst.png'
+        inst1 = visual.TextStim(win, text='Instruction', pos = [0,0],
+                                    height=24, color=[-1,-1,-1], colorSpace='rgb',
+                                    alignHoriz='center', alignVert='center',
+                                    wrapWidth=win.size[0]*.9)
         inst1.draw()
         win.flip()
         key=event.waitKeys(keyList=['space'])
+        
                             
         #show logs window message with '1', proceed with space
         #logs_windows('1', 'space')
