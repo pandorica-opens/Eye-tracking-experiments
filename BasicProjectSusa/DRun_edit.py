@@ -12,6 +12,7 @@ Eye Tracker hardware used.
 Inital Version: May 6th, 2013, Sol Simpson
 """
 from psychopy import visual, event, core, logging
+from psychopy.preferences import prefs
 from psychopy.core import getTime, wait 
 from psychopy.data import importConditions #TrialHandler,
 from psychopy.iohub import (EventConstants, EyeTrackerConstants,
@@ -38,6 +39,9 @@ calibration_failed = 0
 input_file_dir = 'input.csv'
 #output_file_dir = 'Exp Results\\output.csv'
 logfile = logging.LogFile(f= 'Error Results.txt', level = 30, filemode = 'a', logger = None, encoding = 'utf8') #not working
+
+#create global shutdown key
+prefs.general['shutdownKey'] = 'q'
 
 
 class ExperimentRuntime(ioHubExperimentRuntime):
@@ -125,7 +129,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         def row_to_condition(row):
             txt=row
             #array_column_names 
-            print(txt.split(';'))
+            #print(txt.split(';'))
             a = np.empty(len(txt.split(';')))
             a = txt.split(';')
             #print('a', a)
@@ -170,8 +174,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
            
             win.flip()
             
-        def draw_input(item_array_text, item_array_x, item_array_y):
-
+        def draw_input(win, item_array_text, item_array_x, item_array_y):
             
             for i in range(len(item_array_x)):
                 #print(item_array_x[i], item_array_y[i], i, len(item_array_x), len(item_array_text), item_array_text)
@@ -191,7 +194,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
                 
                 item_value.draw()
                 
-            win.flip()
+            win.flip(clearBuffer=False)
             
         
         def logs_windows(log_text, log_key_to_proceed):
@@ -206,12 +209,9 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         def instructions_blank_screen(win):
 
             inst_dir = 'Instructions\\blank_screen.jpg'
-            #maybe blank screen is just grey screen, but not white
             instr=visual.ImageStim(win,image=inst_dir, units='pix', size = (1600, 900))
-            #instr.autoDraw = True
-            instr.draw()
-            win.flip()
-            core.wait(0.5)
+            
+            draw_gaze_dot(win, 1001, 1) #change 1 second to 0.5 seconds
             #print(event.id)
             #print(tracker.getPosition()) #tracker - get position = none
             #print(kb.getEvents())  #kb.getEvents(event_type_id)
@@ -273,35 +273,34 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         
         def instructions_fixation_cross(win):
 
-            inst_dir = 'Instructions\\fixation_cross.jpg'
-            instr=visual.ImageStim(win,image=inst_dir, units='pix', size = (1600, 900))
+            #inst_dir = 'Instructions\\fixation_cross.jpg'
+            #instr=visual.ImageStim(win,image=inst_dir, units='pix', size = (1600, 900))
             #instr.draw()
             
             fixation_cross = visual.TextStim(win, text='+', pos = [-595,345], height=54,color=[-1,-1,-1],colorSpace='rgb')
-            fixation_cross.draw()
-            
+            fixation_cross.autoDraw = True
+            draw_gaze_dot(win, 2001, 1) #change 1 second to 0.5 seconds
             #monitor_coordinate_check(win)
-            win.flip() #comment in case of monitor coordinate check
-            core.wait(0.5)
+            #win.flip() #comment in case of monitor coordinate check
+            fixation_cross.autoDraw = False
             
         def instructions_choice_decision(win, item_list_text):
+            
+            inst_dir = 'Instructions\\choice_decision.jpg'
+            instr=visual.ImageStim(win,image=inst_dir, units='pix', size = (1600, 900))
+            instr.draw()
             
             #item_list_text = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
             item_array_x = np.array([-15, -15, -15, -15,-15, -15, 445, 445, 445, 445, 445, 445])
             item_array_y = np.array([215,105,-5,-115,-225,-335,215,105,-5,-115,-225,-335])
-
-            inst_dir = 'Instructions\\choice_decision.jpg'
-            instr=visual.ImageStim(win,image=inst_dir, units='pix', size = (1600, 900))
-            #add table part here with input tables as random trials
             
             #monitor is 1600 (-800, 800) to 900 (-450, 450)
-
-            instr.draw()
             
-            draw_input(item_list_text, item_array_x, item_array_y)
+            draw_input(win, item_list_text, item_array_x, item_array_y)
             #monitor_coordinate_check(win)
+            draw_gaze_dot(win, 3001, 1000)
             
-            key=event.waitKeys(keyList=['c', 'm']) 
+            #key=event.waitKeys(keyList=['c', 'm']) 
             return key
     
         def draw_trigger(win, tracker, trigger, item_number, output_file_dir, output_eye_dir):
@@ -352,28 +351,27 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             
             return choice
             
-        def draw_gaze_dot(win):
+        def draw_gaze_dot(win, trigger, time):
             #try to paint gaze position
             
-            #test with eye tracker
+            stime = getTime()
         
-            try:
-                coord_type=display.getCoordinateType()
-                gaze_dot =visual.GratingStim(win,tex=None, mask="gauss",
-                                             pos=(0,0 ),size=(66,66),color='green',
-                                                                units=coord_type)
-                gpos=tracker.getPosition()
-                #logs_windows(gpos, 'space')
-                print('gpos, gaze_dot, coord_type, tracker', gpos, gaze_dot, coord_type, tracker)
-                gaze_dot.setPos([gpos[0],gpos[1]])
-                #imageStim.draw()
-                gaze_dot.draw()
-                win.flip()
-                key=event.waitKeys(keyList=[' ']) 
-            except Exception:
-                print('exception - None of gpos')
-                
-                #end try to paint gaze position
+            while getTime()-stime < time:
+                gpos = tracker.getPosition()
+                if (gpos != None):
+                    print('gpos, tracker.getPosition()', gpos, tracker.getPosition())
+                    start_message = visual.TextStim(win, text=str(gpos)+str(trigger), pos = [gpos[0],gpos[1]], height=35,color=[-1,-1,-1],colorSpace='rgb',wrapWidth=win.size[0]*.9)
+                    start_message.draw()
+                    
+                    #start_message = visual.TextStim(win, text=str(gpos), pos = [gpos[1],gpos[0]], height=35,color=[-1,-1,-1],colorSpace='rgb',wrapWidth=win.size[0]*.9)
+                    #start_message.draw()
+                    win.flip(clearBuffer=False)
+                    core.wait(0.1)
+                    
+                key = event.getKeys(keyList=['c', 'm'])
+                print('key event draw gaze dot', key)
+                if key!=[]:
+                    break
                 
             return 0
         
@@ -402,6 +400,8 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         # would need it for later
         mouse.setSystemCursorVisibility(False)
         event.Mouse(visible=False)
+        
+        
 
         
         #------------------------------------------------------------Experiment begins ----------------------------------------------------------------------------------------------
@@ -418,20 +418,6 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         
         tracker.setRecordingState(True)
         
-        stime = getTime()
-
-        
-        while getTime()-stime < 100.0:
-            if (tracker.getPosition() != None):
-                print('get position for 5 seconds', tracker.getPosition())
-                gpos = tracker.getPosition()
-                start_message = visual.TextStim(win, text=str(gpos), pos = [gpos[0],gpos[1]], height=35,color=[-1,-1,-1],colorSpace='rgb',wrapWidth=win.size[0]*.9)
-                start_message.draw()
-                
-                #start_message = visual.TextStim(win, text=str(gpos), pos = [gpos[1],gpos[0]], height=35,color=[-1,-1,-1],colorSpace='rgb',wrapWidth=win.size[0]*.9)
-                #start_message.draw()
-                win.flip()
-                core.wait(0.2)
         #draw instruction (1)
         
         #inst1.image = 'Instructions\Inst.png'
@@ -487,6 +473,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             
             trigger_value=1001
             draw_trigger(win, tracker, trigger_value, item_number,csv_experiment_output, csv_eye_output) #the row indexing starts from 2
+            #draw_gaze_dot(win, trigger_value)
             
             #show logs window message with '5', proceed with space
             #logs_windows('5', 'space')
@@ -629,7 +616,7 @@ if __name__ == "__main__":
             point_counter=0
             
             accepted = True
-            while True:
+            '''while True:
                 line=p.stdout.readline()
                 
                 print line
@@ -669,7 +656,7 @@ if __name__ == "__main__":
                 if fails_counter == 3: 
                     global calibration_failed
                     calibration_failed = 1
-                    break 
+                    break '''
         
         base_config_file=os.path.normcase(os.path.join(configurationDirectory,
                                                        'iohub_config.yaml.part'))
