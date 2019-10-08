@@ -156,12 +156,12 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             for i in range(90):
                 
                 
-                texti = str(-450+10*i)
+                texti = str(-450+10*i) #-display_resolution[1]/2
                 
                 pixel_line_y = visual.ShapeStim(win, units='pix', lineWidth=1.5,lineColor=(55,255,255),lineColorSpace='rgb255', vertices=((-750, -450+10*i),(750, -450+10*i)),closeShape=False, pos=(0, 0), size=1.2)
                 pixel_name_y = visual.TextStim(win, text='y='+texti, height=10, units='pix', pos = [0,-450+10*i],color=[255,55,255],colorSpace='rgb255')
                 
-                texti = str(-800+i*20)
+                texti = str(-800+i*20) #-display_resolution[0]/2
                 
                 pixel_line_x = visual.ShapeStim(win, units='pix', lineWidth=1.5,lineColor=(155,255,55),lineColorSpace='rgb255', vertices=((-800+i*20, -450),(-800+i*20, 450)),closeShape=False, pos=(0, 0), size=1) #what size param
                 pixel_name_x = visual.TextStim(win, text=texti, height=9, units='pix', pos = [-800+i*20,0],color=[255,55,55],colorSpace='rgb255')
@@ -216,6 +216,10 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             #print(tracker.getPosition()) #tracker - get position = none
             #print(kb.getEvents())  #kb.getEvents(event_type_id)
             
+            for events in tracker.getEvents():
+                print(events, '\n')
+                print('\n')
+            
             '''KeyboardReleaseEventNT(experiment_id=1, session_id=1, device_id=0, 
                 event_id=175, type=23, device_time=15105.28, logged_time=23.941098399425755, time=23.941098399425755, 
                 confidence_interval=0.0, delay=0.0, filter_id=0, auto_repeated=0, scan_code=57, key_id=32, ucode=0, key=' ', 
@@ -247,7 +251,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             
             
             #print(display.getEvents()) #empty list
-            #print(tracker.getEvents()) #tracker.getEvents(event_type_id)
+            #here we want FixationStartEvent or FixationEndEvent
             
             '''[BinocularEyeSampleEventNT(experiment_id=1, 
                 session_id=1, device_id=0, event_id=87, type=52, device_time=211052.468, logged_time=20.073157634193194, time=211052.4679924997, 
@@ -274,7 +278,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         def instructions_fixation_cross(win):
 
             #inst_dir = 'Instructions\\fixation_cross.jpg'
-            #instr=visual.ImageStim(win,image=inst_dir, units='pix', size = (1600, 900))
+            #instr=visual.ImageStim(win,image=inst_dir, units='pix', size = display_resolution)
             #instr.draw()
             
             fixation_cross = visual.TextStim(win, text='+', pos = [-595,345], height=54,color=[-1,-1,-1],colorSpace='rgb')
@@ -287,14 +291,12 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         def instructions_choice_decision(win, item_list_text):
             
             inst_dir = 'Instructions\\choice_decision.jpg'
-            instr=visual.ImageStim(win,image=inst_dir, units='pix', size = (1600, 900))
+            instr=visual.ImageStim(win,image=inst_dir, units='pix', size = display_resolution)
             instr.draw()
             
             #item_list_text = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
             item_array_x = np.array([-15, -15, -15, -15,-15, -15, 445, 445, 445, 445, 445, 445])
             item_array_y = np.array([215,105,-5,-115,-225,-335,215,105,-5,-115,-225,-335])
-            
-            #monitor is 1600 (-800, 800) to 900 (-450, 450)
             
             draw_input(win, item_list_text, item_array_x, item_array_y)
             #monitor_coordinate_check(win)
@@ -358,18 +360,24 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         
             while getTime()-stime < time:
                 gpos = tracker.getPosition()
+                #print('binocular', tracker.FixationEndEvent())
+                #obj = tracker.BinocularEyeSampleEvent(EyeTrackerEvent)
+                #print(obj)
+                #print('binocular left gaze x', tracker.BinocularEyeSampleEvent.left_gaze_x())
+                #left_gaze_x
                 if (gpos != None):
-                    print('gpos, tracker.getPosition()', gpos, tracker.getPosition())
-                    start_message = visual.TextStim(win, text=str(gpos)+str(trigger), pos = [gpos[0],gpos[1]], height=35,color=[-1,-1,-1],colorSpace='rgb',wrapWidth=win.size[0]*.9)
+                    #print('gpos, tracker.getPosition()', gpos, tracker.getPosition()) basically gpos and tracker.getPosition are the same, so it gets executed in the matter of milliseconds
+                    #start_message = visual.TextStim(win, text=str(gpos)+str(trigger), pos = [gpos[0],gpos[1]], height=10,color=[-1,-1,-1],colorSpace='rgb',wrapWidth=win.size[0])
+                    start_message = visual.TextStim(win, text='+', pos = [gpos[0],gpos[1]], height=10,color=[-1,-1,-1],colorSpace='rgb',wrapWidth=win.size[0])
                     start_message.draw()
                     
                     #start_message = visual.TextStim(win, text=str(gpos), pos = [gpos[1],gpos[0]], height=35,color=[-1,-1,-1],colorSpace='rgb',wrapWidth=win.size[0]*.9)
                     #start_message.draw()
                     win.flip(clearBuffer=False)
-                    core.wait(0.1)
+                    core.wait(0.005)
                     
                 key = event.getKeys(keyList=['c', 'm'])
-                print('key event draw gaze dot', key)
+                #print('key event draw gaze dot', key)
                 if key!=[]:
                     break
                 
@@ -450,11 +458,15 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         self.hub.sendMessageEvent(text="Eye Tracker being Used: {0}".format(selected_eyetracker_name))
         self.hub.sendMessageEvent(text="IO_HUB EXPERIMENT_INFO END")
         
-       
+        print('get current date time', "{0}".format(getCurrentDateTimeString()))
+        print('experiment ID', self.hub.experimentID,'experiment session ID', self.hub.experimentSessionID) 
+        print('display', "{0}".format(display.getIndex()), 'pixel resolution', "{0}".format(display.getPixelResolution()), 'coordinate type', "{0}".format(display.getCoordinateType()))
+        print('pixels degree', "{0}".format(display.getPixelsPerDegree()), 'selected eyetracker', selected_eyetracker_name)
+
         #show logs window message with '2', proceed with space
         #logs_windows('2', 'space')
 
-        #self.hub.clearEvents('all')         # why here clear events
+        self.hub.clearEvents('all')         # why here clear events
         
         #show logs window message with '3', proceed with space
         #logs_windows('3', 'space')
@@ -464,6 +476,8 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         
         
         for t in range(2): #number of trials is 10
+            
+            self.hub.sendMessageEvent(text="TRIAL_START")
             
             item_number = random.randrange(2, 11, 1)
             #print(item_number)
@@ -487,12 +501,14 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             trigger_value=3001
             draw_trigger(win, tracker, trigger_value, item_number, csv_experiment_output, csv_eye_output)
             
+            self.hub.sendMessageEvent(text='TRIAL_END')
+
             #draw_gaze_dot(win)
             
             
             #show logs window message with '7', proceed with space
             #logs_windows('7', 'space')
-
+       
         #show logs window message with '8', proceed with space
         #logs_windows('8', 'space')
         #print('after 8')

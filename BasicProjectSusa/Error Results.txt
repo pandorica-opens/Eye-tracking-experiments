@@ -1,0 +1,4 @@
+35.7783 	ERROR 	Couldn't find image file 'Instructionslank_screen.jpg'; check path?
+38.3189 	ERROR 	Couldn't find image file 'Instructionslank_screen.jpg'; check path?
+26.1711 	ERROR 	Couldn't find image file 'Instructionslank_screen.jpg'; check path?
+45.3350 	ERROR 	Couldn't find image file 'Instructionslank_screen.jpg'; check path?
