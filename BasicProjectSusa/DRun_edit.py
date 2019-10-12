@@ -14,13 +14,13 @@ Inital Version: May 6th, 2013, Sol Simpson
 from psychopy import visual, event, core, logging
 from psychopy.preferences import prefs
 from psychopy.core import getTime, wait 
-from psychopy.data import importConditions #TrialHandler,
+from psychopy.data import importConditions, TrialHandler
 from psychopy.iohub import (EventConstants, EyeTrackerConstants,
                             getCurrentDateTimeString, ioHubExperimentRuntime)
 import os
 import random
 import site
-site.addsitedir('C:\Python27\Lib\site-packages')
+site.addsitedir('C:\Users\Standard\Miniconda2\Lib\site-packages')
 from psynteract import Connection 
 import psynteract
 import socket
@@ -62,12 +62,19 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         global con
         
         from psychopy.iohub import module_directory
+        
         exp_script_dir = module_directory(self.run)
-        #exp_conditions = importConditions(os.path.join(exp_script_dir,
-        #                                               'trial_conditions.xlsx'))
+        exp_conditions = importConditions(os.path.join(exp_script_dir,
+                                                       'trial_conditions.xlsx'))
                                                        
         #TrialHandler(trialList, nReps, method=’random’, dataTypes=None, extraInfo=None, seed=None, originPath=None, name=’‘, autoLog=True)
-        #trials = TrialHandler(exp_conditions, 1) # 1 - number of repetitions, how do we use conditions lets try to comment out
+        trials = TrialHandler(exp_conditions, 1) # 1 - number of repetitions, how do we use conditions lets try to comment out
+        # Inform the ioDataStore that the experiment is using a
+        # TrialHandler. The ioDataStore will create a table
+        # which can be used to record the actual trial variable values (DV or IV)
+        # in the order run / collected.
+        #
+        self.hub.createTrialHandlerRecordTable(trials)
         
         #Use Esc to quit, it will be called at some stages during the experiment
         def _checkQuit(key):
@@ -434,7 +441,11 @@ class ExperimentRuntime(ioHubExperimentRuntime):
                                     alignHoriz='center', alignVert='center',
                                     wrapWidth=win.size[0]*.9)
         inst1.draw()
-        win.flip()
+        
+        flip_time=win.flip()
+        self.hub.sendMessageEvent(text="EXPERIMENT_START",sec_time=flip_time)
+        self.hub.clearEvents('all')
+        
         key=event.waitKeys(keyList=['space'])
         
                             
@@ -443,9 +454,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         
          #------------------------------------------------------------Experiment trial testing ----------------------------------------------------------------------------------------------
         
-        flip_time=win.flip()
-        self.hub.sendMessageEvent(text="EXPERIMENT_START",sec_time=flip_time)
-        self.hub.clearEvents('all')
+        
     
         # Send some information to the ioHub DataStore as experiment messages
         # including the eye tracker being used for this session.
@@ -473,11 +482,11 @@ class ExperimentRuntime(ioHubExperimentRuntime):
 
         #trials.printAsText() #does not work
         #tracker.getLastGazePosition()
-        
+
         
         for t in range(2): #number of trials is 10
-            
             self.hub.sendMessageEvent(text="TRIAL_START")
+            self.hub.clearEvents('all')
             
             item_number = random.randrange(2, 11, 1)
             #print(item_number)
@@ -500,63 +509,43 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             
             trigger_value=3001
             draw_trigger(win, tracker, trigger_value, item_number, csv_experiment_output, csv_eye_output)
-            
-            self.hub.sendMessageEvent(text='TRIAL_END')
 
-            #draw_gaze_dot(win)
-            
-            
-            #show logs window message with '7', proceed with space
-            #logs_windows('7', 'space')
-       
-        #show logs window message with '8', proceed with space
-        #logs_windows('8', 'space')
-        #print('after 8')
+            flip_time=win.flip()
+            self.hub.sendMessageEvent(text='TRIAL_END',sec_time=flip_time)
+            self.hub.clearEvents('all')
+        
 
         #------------------------------------------------------------Experiment ends ----------------------------------------------------------------------------------------------
 
         # Disconnect the eye tracking device.
-        
-        tracker.setConnectionState(False)
            
         # So the experiment is done, all trials have been run.
         # Clear the screen and show an 'experiment  done' message using the
         # instructionScreen state. What for the trigger to exit that state.
         # (i.e. the space key was pressed)
         #
-        
-        instructions_text_stim = visual.TextStim(win, text='', pos = [0,0],
-                                    height=24, color=[-1,-1,-1], colorSpace='rgb',
-                                    alignHoriz='center', alignVert='center',
-                                    wrapWidth=win.size[0]*.9)
-                                    
-        instuction_text="Press Any Key to Exit Demo"
-        instructions_text_stim.setText(instuction_text)
-        instructions_text_stim.draw()
-        
         flip_time=win.flip()
-        self.hub.sendMessageEvent(text="SHOW_DONE_TEXT",sec_time=flip_time)
-        #print('hiii', flip_time)
-        #cs.close() #another one close
-        #print('hii2i')
+        self.hub.sendMessageEvent(text='EXPERIMENT_COMPLETE',sec_time=flip_time)
+        tracker.setRecordingState(False)
+        tracker.setConnectionState(False)
         
-        #self.hub.clearEvents('all')
-        
-        #'experiment  done', redo using instructionScreen state
-        #logs_windows("The experiment is complete. Press 'f2' to exit", 'f2')
-        
-        self.hub.sendMessageEvent(text='EXPERIMENT_COMPLETE')
-        
-        #print('hiii3')
+        logs_windows("The experiment is complete. Press 'f2' to exit", 'f2')
+        self.hub.sendMessageEvent(text="SHOW_DONE_TEXT")
+
         tex1=eventtxt.Eventtotext()
-        #print('hiii4', tex1)
         tex1.convertToText(exp_script_dir,subject_id,localtime)
-        
-        #print('hiii5', exp_script_dir)
+        self.hub.clearEvents('all')
+
         #self.hub.clearEvents('all', exp_script_dir) 
         
         # MANAGER ERROR WHEN SENDING MSG:[Errno 9] Bad file descriptor
         #Warning: TimeoutExpired, Killing ioHub Server process.
+        
+        #ioHubExperimentRuntime.shutdown()
+        #print(ioHubExperimentRuntime)
+        win.close()
+        #io.quit()
+        #print('end of exp logic')
         
         
         ### End of experiment logic
@@ -688,13 +677,16 @@ if __name__ == "__main__":
 
 
         runtime=ExperimentRuntime(configurationDirectory, "experiment_config.yaml")
+        print('after runtime')
         runtime.start((dlg_info.values()[0],))
+        print('after runtime info ')
         os.remove(configurationDirectory+"\events.hdf5")#this line to remove the hdf5 so in the next run of the expermint will not append
+        print('after remove')
         
         if dlg_info.values()[0] =='The Eye Tribe':
             s.terminate()
             p.terminate()
-        
+        print('after terminate s,p')
 
     # Get the current directory, using a method that does not rely on __FILE__
     # or the accuracy of the value of __FILE__.
