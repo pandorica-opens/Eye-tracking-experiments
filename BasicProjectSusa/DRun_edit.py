@@ -14,7 +14,7 @@ Inital Version: May 6th, 2013, Sol Simpson
 from psychopy import visual, event, core, logging
 from psychopy.preferences import prefs
 from psychopy.core import getTime, wait 
-from psychopy.data import importConditions, TrialHandler
+from psychopy.data import importConditions#, TrialHandler
 from psychopy.iohub import (EventConstants, EyeTrackerConstants,
                             getCurrentDateTimeString, ioHubExperimentRuntime)
 import os
@@ -37,7 +37,6 @@ con=1
 calibration_failed = 0
 
 input_file_dir = 'input.csv'
-#output_file_dir = 'Exp Results\\output.csv'
 logfile = logging.LogFile(f= 'Error Results.txt', level = 30, filemode = 'a', logger = None, encoding = 'utf8') #not working
 
 #create global shutdown key
@@ -64,17 +63,17 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         from psychopy.iohub import module_directory
         
         exp_script_dir = module_directory(self.run)
-        exp_conditions = importConditions(os.path.join(exp_script_dir,
-                                                       'trial_conditions.xlsx'))
+        #exp_conditions = importConditions(os.path.join(exp_script_dir,
+        #                                               'trial_conditions.xlsx'))
                                                        
         #TrialHandler(trialList, nReps, method=’random’, dataTypes=None, extraInfo=None, seed=None, originPath=None, name=’‘, autoLog=True)
-        trials = TrialHandler(exp_conditions, 1) # 1 - number of repetitions, how do we use conditions lets try to comment out
+        #trials = TrialHandler(exp_conditions, 1) # 1 - number of repetitions, how do we use conditions lets try to comment out
         # Inform the ioDataStore that the experiment is using a
         # TrialHandler. The ioDataStore will create a table
         # which can be used to record the actual trial variable values (DV or IV)
         # in the order run / collected.
         #
-        self.hub.createTrialHandlerRecordTable(trials)
+        #self.hub.createTrialHandlerRecordTable(trials)
         
         #Use Esc to quit, it will be called at some stages during the experiment
         def _checkQuit(key):
@@ -194,7 +193,8 @@ class ExperimentRuntime(ioHubExperimentRuntime):
                                             closeShape=True, 
                                             fillColor = (255,255,255), fillColorSpace='rgb255',
                                             pos=(0, 0), size=1) #what size param
-                whitebox.draw()
+                #uncomment white box in case want to create different background on values
+                #whitebox.draw() 
                 
                 item_value = visual.TextStim(win, text=item_array_text[i+1], height=21, units='pix', #here we use i+1 because the first number is numbers item
                 pos = [item_array_x[i],item_array_y[i]],color=[0,0,0],colorSpace='rgb255')
@@ -214,18 +214,26 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             return key
 
         def instructions_blank_screen(win):
-
-            inst_dir = 'Instructions\\blank_screen.jpg'
-            instr=visual.ImageStim(win,image=inst_dir, units='pix', size = (1600, 900))
             
-            draw_gaze_dot(win, 1001, 1) #change 1 second to 0.5 seconds
+            #uncomment in case want to draw gaze dot
+            timer = core.Clock()
+            timer.add(0.5)
+            while timer.getTime()<0:
+                print('precise timing bl', timer.getTime())
+                #uncomment in case want to draw gaze dot
+                
+                #while in while is not accurate, it would get into draw gaze dot loop
+                #and when it would exit, it can be way over 0.5 seconds
+                
+                #draw_gaze_dot(win, 1001, 0.2) 
+
             #print(event.id)
             #print(tracker.getPosition()) #tracker - get position = none
             #print(kb.getEvents())  #kb.getEvents(event_type_id)
             
-            for events in tracker.getEvents():
-                print(events, '\n')
-                print('\n')
+            #for events in tracker.getEvents():
+            #    print(events, '\n')
+            #    print('\n')
             
             '''KeyboardReleaseEventNT(experiment_id=1, session_id=1, device_id=0, 
                 event_id=175, type=23, device_time=15105.28, logged_time=23.941098399425755, time=23.941098399425755, 
@@ -290,26 +298,96 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             
             fixation_cross = visual.TextStim(win, text='+', pos = [-595,345], height=54,color=[-1,-1,-1],colorSpace='rgb')
             fixation_cross.autoDraw = True
-            draw_gaze_dot(win, 2001, 1) #change 1 second to 0.5 seconds
+            win.flip()
+            
+            #uncomment in case we want to see the fixation
+            #draw_gaze_dot(win, 2001, 0.5) #change 1 second to 0.5 seconds
+            
+            #comment in case want to see gazedot
+            timer = core.Clock()
+            timer.add(0.5)
+            while timer.getTime()<0:
+                print('precise timing +', timer.getTime())
+                #draw_gaze_dot(win, 2001, 0.2)
+                
+            #uncomment in case of coordinate monitor greed 
             #monitor_coordinate_check(win)
-            #win.flip() #comment in case of monitor coordinate check
+            
+            #comment in case of monitor coordinate check
+            #win.flip() 
             fixation_cross.autoDraw = False
             
+        def draw_table_lines(win):
+            table_rectangle = visual.ShapeStim(win, units='pix', lineWidth=1.5,
+                                            lineColor=(25,25,255),lineColorSpace='rgb255', 
+                                            vertices=((-225, 375), (200,375),(200,-395),(-225,-395)),
+                                            closeShape=True,
+                                            pos=(0, 0), size=1)
+            table_rectangle2 = visual.ShapeStim(win, units='pix', lineWidth=1.5,
+                                            lineColor=(25,25,25),lineColorSpace='rgb255', 
+                                            vertices=((235, 375), (650,375),(650,-395),(235,-395)),
+                                            closeShape=True,
+                                            pos=(0, 0), size=1)
+            line1 = visual.ShapeStim(win, units='pix', lineWidth=1.5,
+                                            lineColor=(25,25,25),lineColorSpace='rgb255', 
+                                            vertices=((-225, 327), (200,327)),
+                                            pos=(0, 0), size=1)
+            line2 = visual.ShapeStim(win, units='pix', lineWidth=1.5,
+                                            lineColor=(25,25,25),lineColorSpace='rgb255', 
+                                            vertices=((235, 327), (650,327)),
+                                            pos=(0, 0), size=1)
+            line_dotted1 = visual.Line(win, start=(-660, 280), end=(650, 280),lineColor=(25,25,25),lineColorSpace='rgb255')
+            line_dotted2 = visual.Line(win, start=(-660, 148), end=(650, 148),lineColor=(25,25,25),lineColorSpace='rgb255')
+            line_dotted3 = visual.Line(win, start=(-660, 40), end=(650, 40),lineColor=(25,25,25),lineColorSpace='rgb255')
+            line_dotted4 = visual.Line(win, start=(-660, -70), end=(650, -70),lineColor=(25,25,25),lineColorSpace='rgb255')
+            line_dotted5 = visual.Line(win, start=(-660, -175), end=(650, -175),lineColor=(25,25,25),lineColorSpace='rgb255')
+            line_dotted6 = visual.Line(win, start=(-660, -284), end=(650, -284),lineColor=(25,25,25),lineColorSpace='rgb255')
+            text = ['Number of participating countries', 'Costs to average household per \n month',
+            'Share of emission represented by \nparticipating countries', 'Distribution of cost from \nimplementing the agreement',
+            'Sanctions for missing emission \nreduction targets', 'Monitoring: Emission reductions \nwill be monitored by', 'Agreement 1',
+            'Agreement 2']
+            
+            for i in range(6):
+                start_message = visual.TextStim(win, text=text[i], pos = [-640,215-i*112], 
+                                                height=24,color=[25,25,25],colorSpace='rgb255'
+                                                ,wrapWidth=win.size[0]*.9, alignHoriz='left')
+                start_message.draw()
+                
+            agreement_message1 = visual.TextStim(win, text=text[6], pos = [-15,355], height=24,color=[25,25,25],colorSpace='rgb255',wrapWidth=win.size[0]*.9)
+            agreement_message1.draw()
+            agreement_message2 = visual.TextStim(win, text=text[7], pos = [440,355], height=24,color=[25,25,25],colorSpace='rgb255',wrapWidth=win.size[0]*.9)
+            agreement_message2.draw()
+                
+            table_rectangle.draw()
+            table_rectangle2.draw()
+            line1.draw()
+            line2.draw()
+            line_dotted1.draw()
+            line_dotted2.draw()
+            line_dotted3.draw()
+            line_dotted4.draw()
+            line_dotted5.draw()
+            line_dotted6.draw()
+            
         def instructions_choice_decision(win, item_list_text):
-            
-            inst_dir = 'Instructions\\choice_decision.jpg'
-            instr=visual.ImageStim(win,image=inst_dir, units='pix', size = display_resolution)
-            instr.draw()
-            
-            #item_list_text = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
+            #uncomment in case we want to compare with table from the presentation experiment requirements
+            #inst_dir = 'Instructions\\choice_decision.jpg'
+            #instr=visual.ImageStim(win,image=inst_dir, units='pix', size = display_resolution)
+            #instr.draw()
+           
             item_array_x = np.array([-15, -15, -15, -15,-15, -15, 445, 445, 445, 445, 445, 445])
             item_array_y = np.array([215,105,-5,-115,-225,-335,215,105,-5,-115,-225,-335])
             
+            draw_table_lines(win)
             draw_input(win, item_list_text, item_array_x, item_array_y)
+            #uncomment in case we want show pixel coordinate greed
             #monitor_coordinate_check(win)
-            draw_gaze_dot(win, 3001, 1000)
             
-            #key=event.waitKeys(keyList=['c', 'm']) 
+            #uncomment in case want to see gazedot
+            #draw_gaze_dot(win, 3001, 10000)
+            
+            #comment in case want to see gazedot
+            key=event.waitKeys(keyList=['c', 'm']) 
             return key
     
         def draw_trigger(win, tracker, trigger, item_number, output_file_dir, output_eye_dir):
@@ -362,6 +440,8 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             
         def draw_gaze_dot(win, trigger, time):
             #try to paint gaze position
+            #if we are not using draw gaze dot, then we would not use 'c', 'm' to transfer through the blank and fixation_cross
+            #screens.  
             
             stime = getTime()
         
@@ -409,7 +489,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
        
         # it is recommended to use pixle as unit espically if you are using eye tracker, because the eyetracker returns the readings in pixel
         win=visual.Window(display_resolution,monitor=display.getPsychopyMonitorName(),units='pix',fullscr=True,screen= display.getIndex(),
-        waitBlanking=False, color="white")
+        waitBlanking=False) #color="white"
         
         # Hide the 'system mouse cursor'.
         # would need it for later
@@ -529,13 +609,15 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         tracker.setRecordingState(False)
         tracker.setConnectionState(False)
         
-        logs_windows("The experiment is complete. Press 'f2' to exit", 'f2')
+        logs_windows("The experiment is complete. Press ''escape'' to exit", 'escape')
+        print('checkquit escape')
+        _checkQuit(key)
+        
         self.hub.sendMessageEvent(text="SHOW_DONE_TEXT")
 
         tex1=eventtxt.Eventtotext()
         tex1.convertToText(exp_script_dir,subject_id,localtime)
         self.hub.clearEvents('all')
-
         #self.hub.clearEvents('all', exp_script_dir) 
         
         # MANAGER ERROR WHEN SENDING MSG:[Errno 9] Bad file descriptor
@@ -544,7 +626,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         #ioHubExperimentRuntime.shutdown()
         #print(ioHubExperimentRuntime)
         win.close()
-        #io.quit()
+        self.hub.quit()
         #print('end of exp logic')
         
         
