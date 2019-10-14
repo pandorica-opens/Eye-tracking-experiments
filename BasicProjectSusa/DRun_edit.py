@@ -213,84 +213,17 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             key=event.waitKeys(keyList=[log_key_to_proceed])
             return key
 
-        def instructions_blank_screen(win):
+        def instructions_blank_screen(win, output_eye_dir):
             
             #uncomment in case want to draw gaze dot
-            timer = core.Clock()
+            '''timer = core.Clock()
             timer.add(0.5)
             while timer.getTime()<0:
-                print('precise timing bl', timer.getTime())
-                #uncomment in case want to draw gaze dot
-                
-                #while in while is not accurate, it would get into draw gaze dot loop
-                #and when it would exit, it can be way over 0.5 seconds
-                
-                #draw_gaze_dot(win, 1001, 0.2) 
+                print('precise timing bl', timer.getTime())'''
 
-            #print(event.id)
-            #print(tracker.getPosition()) #tracker - get position = none
-            #print(kb.getEvents())  #kb.getEvents(event_type_id)
-            
-            #for events in tracker.getEvents():
-            #    print(events, '\n')
-            #    print('\n')
-            
-            '''KeyboardReleaseEventNT(experiment_id=1, session_id=1, device_id=0, 
-                event_id=175, type=23, device_time=15105.28, logged_time=23.941098399425755, time=23.941098399425755, 
-                confidence_interval=0.0, delay=0.0, filter_id=0, auto_repeated=0, scan_code=57, key_id=32, ucode=0, key=' ', 
-                modifiers=[], window_id=1049896, char=u' ', duration=0.059997031472448725, press_event_id=172), 
-                
-                KeyboardPressEventNT(experiment_id=1, session_id=1, device_id=0, event_id=179, type=22, device_time=15105.374, 
-                logged_time=24.041724395678102, time=24.041724395678102, confidence_interval=0.0, delay=0.0, filter_id=0, 
-                auto_repeated=0, scan_code=57, key_id=32, ucode=0, key=' ', modifiers=[], window_id=1049896, char=u' ', duration=0.0, 
-                press_event_id=0), 
-                
-                KeyboardReleaseEventNT(experiment_id=1, session_id=1, device_id=0, event_id=181, type=23, 
-                device_time=15105.436, logged_time=24.101254831381084, time=24.101254831381084, confidence_interval=0.0, delay=0.0, 
-                filter_id=0, auto_repeated=0, scan_code=57, key_id=32, ucode=0, key=' ', modifiers=[], window_id=1049896, char=u' ', 
-                duration=0.05953043570298178, press_event_id=179), 
-                
-                KeyboardPressEventNT(experiment_id=1, session_id=1, device_id=0, 
-                event_id=185, type=22, device_time=15105.53, logged_time=24.201119747564007, time=24.201119747564007, confidence_interval=0.0, 
-                delay=0.0, filter_id=0, auto_repeated=0, scan_code=57, key_id=32, ucode=0, key=' ', modifiers=[], window_id=1049896, char=u' ', 
-                duration=0.0, press_event_id=0), 
-                
-                KeyboardReleaseEventNT(experiment_id=1, session_id=1, device_id=0, event_id=188, type=23, 
-                device_time=15105.592, logged_time=24.26133744488652, time=24.26133744488652, confidence_interval=0.0, delay=0.0, filter_id=0, 
-                auto_repeated=0, scan_code=57, key_id=32, ucode=0, key=' ', modifiers=[], window_id=1049896, char=u' ', duration=0.06021769732251414, 
-                press_event_id=185), 
-                
-                KeyboardPressEventNT(experiment_id=1, session_id=1, device_id=0, event_id=195, type=22, device_time=15105.764, 
-                logged_time=24.44114932231423, time=24.44114932231423, confidence_interval=0.0, delay=0.0, filter_id=0, auto_repeated=0, scan_code=57, 
-                key_id=32, ucode=0, key=' ', modifiers=[], window_id=1049896, char=u' ', duration=0.0, press_event_id=0)]'''
-            
-            
-            #print(display.getEvents()) #empty list
-            #here we want FixationStartEvent or FixationEndEvent
-            
-            '''[BinocularEyeSampleEventNT(experiment_id=1, 
-                session_id=1, device_id=0, event_id=87, type=52, device_time=211052.468, logged_time=20.073157634193194, time=211052.4679924997, 
-                confidence_interval=0.0, delay=-211032.39483486552, filter_id=1001, left_gaze_x=0, left_gaze_y=0, left_gaze_z=0, left_eye_cam_x=0,
-                left_eye_cam_y=0,
-                left_eye_cam_z=0, left_angle_x=0, left_angle_y=0, left_raw_x=0, left_raw_y=0, left_pupil_measure1=0, left_pupil_measure1_type=70, 
-                left_pupil_measure2=0, left_pupil_measure2_type=0, left_ppd_x=0, left_ppd_y=0, left_velocity_x=0, left_velocity_y=0, left_velocity_xy=0, 
-                right_gaze_x=0, right_gaze_y=0, right_gaze_z=0, right_eye_cam_x=0, right_eye_cam_y=0, right_eye_cam_z=0, right_angle_x=0, right_angle_y=0, 
-                right_raw_x=0, right_raw_y=0, right_pupil_measure1=0, right_pupil_measure1_type=70, right_pupil_measure2=0, right_pupil_measure2_type=0, 
-                right_ppd_x=0, right_ppd_y=0, right_velocity_x=0, right_velocity_y=0, right_velocity_xy=0, status=16), 
-                
-                BinocularEyeSampleEventNT(experiment_id=1, session_id=1, device_id=0, event_id=106, type=52, device_time=211053.06, 
-                logged_time=20.633184666747184, time=211053.05999328924, confidence_interval=0.0, delay=-211032.4268086225, filter_id=1001,
-                left_gaze_x=0, left_gaze_y=0, left_gaze_z=0, left_eye_cam_x=0, left_eye_cam_y=0, left_eye_cam_z=0, left_angle_x=0, 
-                left_angle_y=0, left_raw_x=0, left_raw_y=0, left_pupil_measure1=0, left_pupil_measure1_type=70, left_pupil_measure2=0, 
-                left_pupil_measure2_type=0, left_ppd_x=0, left_ppd_y=0, left_velocity_x=0, left_velocity_y=0, left_velocity_xy=0, 
-                right_gaze_x=0, right_gaze_y=0, right_gaze_z=0, right_eye_cam_x=0, right_eye_cam_y=0, right_eye_cam_z=0, right_angle_x=0,
-                right_angle_y=0, right_raw_x=0, right_raw_y=0, right_pupil_measure1=0, right_pupil_measure1_type=70, right_pupil_measure2=0,
-                right_pupil_measure2_type=0, right_ppd_x=0, right_ppd_y=0, right_velocity_x=0, right_velocity_y=0, right_velocity_xy=0, status=16)]'''
-            
-            
-            #print(mouse.getEvents()) #empty list
+            draw_gaze_dot(win, 1001, 0.5, output_eye_dir)
         
-        def instructions_fixation_cross(win):
+        def instructions_fixation_cross(win, output_eye_dir):
 
             #inst_dir = 'Instructions\\fixation_cross.jpg'
             #instr=visual.ImageStim(win,image=inst_dir, units='pix', size = display_resolution)
@@ -301,15 +234,8 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             win.flip()
             
             #uncomment in case we want to see the fixation
-            #draw_gaze_dot(win, 2001, 0.5) #change 1 second to 0.5 seconds
-            
-            #comment in case want to see gazedot
-            timer = core.Clock()
-            timer.add(0.5)
-            while timer.getTime()<0:
-                print('precise timing +', timer.getTime())
-                #draw_gaze_dot(win, 2001, 0.2)
-                
+            draw_gaze_dot(win, 2001, 0.5, output_eye_dir) #change 1 second to 0.5 seconds
+
             #uncomment in case of coordinate monitor greed 
             #monitor_coordinate_check(win)
             
@@ -369,7 +295,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             line_dotted5.draw()
             line_dotted6.draw()
             
-        def instructions_choice_decision(win, item_list_text):
+        def instructions_choice_decision(win, item_list_text, output_eye_dir):
             #uncomment in case we want to compare with table from the presentation experiment requirements
             #inst_dir = 'Instructions\\choice_decision.jpg'
             #instr=visual.ImageStim(win,image=inst_dir, units='pix', size = display_resolution)
@@ -380,14 +306,10 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             
             draw_table_lines(win)
             draw_input(win, item_list_text, item_array_x, item_array_y)
-            #uncomment in case we want show pixel coordinate greed
-            #monitor_coordinate_check(win)
-            
-            #uncomment in case want to see gazedot
-            #draw_gaze_dot(win, 3001, 10000)
+            draw_gaze_dot(win, 3001, 10000, output_eye_dir)
             
             #comment in case want to see gazedot
-            key=event.waitKeys(keyList=['c', 'm']) 
+            #key=event.waitKeys(keyList=['c', 'm']) 
             return key
     
         def draw_trigger(win, tracker, trigger, item_number, output_file_dir, output_eye_dir):
@@ -410,24 +332,21 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             #print(input_to_make_decision_split)
             
             #change x,y, gazetime while testing with eyetribe
-            x,y,gazetime = 10, 20, 30
+            x,y,gazetime = 'did not catch', 'eyedata, possibly blinked', 30
 
             
             if (trigger == 1001):
-                instructions_blank_screen(win)
+                instructions_blank_screen(win, output_eye_dir)
                 to_output(subject_id, 'space', trigger, input_to_make_decision, output_file_dir)
-                to_output_eyetracking(subject_id, x, y, gazetime, trigger, output_eye_dir)
                 
             
             if (trigger == 2001):
-                instructions_fixation_cross(win)
+                instructions_fixation_cross(win, output_eye_dir,)
                 to_output(subject_id, 'space', trigger, input_to_make_decision, output_file_dir)
-                to_output_eyetracking(subject_id, x, y, gazetime, trigger, output_eye_dir)
                 
             if (trigger == 3001):
-                choice = instructions_choice_decision(win, input_to_make_decision_split)
+                choice = instructions_choice_decision(win, input_to_make_decision_split, output_eye_dir)
                 to_output(subject_id, choice, trigger, input_to_make_decision, output_file_dir)
-                to_output_eyetracking(subject_id, x, y, gazetime, trigger, output_eye_dir)
                 
             
             flip_time=win.flip()
@@ -438,7 +357,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             
             return choice
             
-        def draw_gaze_dot(win, trigger, time):
+        def draw_gaze_dot(win, trigger, time, output_eye_dir):
             #try to paint gaze position
             #if we are not using draw gaze dot, then we would not use 'c', 'm' to transfer through the blank and fixation_cross
             #screens.  
@@ -447,26 +366,25 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         
             while getTime()-stime < time:
                 gpos = tracker.getPosition()
-                #print('binocular', tracker.FixationEndEvent())
-                #obj = tracker.BinocularEyeSampleEvent(EyeTrackerEvent)
-                #print(obj)
-                #print('binocular left gaze x', tracker.BinocularEyeSampleEvent.left_gaze_x())
-                #left_gaze_x
+
                 if (gpos != None):
-                    #print('gpos, tracker.getPosition()', gpos, tracker.getPosition()) basically gpos and tracker.getPosition are the same, so it gets executed in the matter of milliseconds
-                    #start_message = visual.TextStim(win, text=str(gpos)+str(trigger), pos = [gpos[0],gpos[1]], height=10,color=[-1,-1,-1],colorSpace='rgb',wrapWidth=win.size[0])
                     start_message = visual.TextStim(win, text='+', pos = [gpos[0],gpos[1]], height=10,color=[-1,-1,-1],colorSpace='rgb',wrapWidth=win.size[0])
                     start_message.draw()
                     
                     #start_message = visual.TextStim(win, text=str(gpos), pos = [gpos[1],gpos[0]], height=35,color=[-1,-1,-1],colorSpace='rgb',wrapWidth=win.size[0]*.9)
                     #start_message.draw()
                     win.flip(clearBuffer=False)
+                    to_output_eyetracking(subject_id, gpos[0], gpos[1], getTime(), trigger, output_eye_dir)
                     core.wait(0.005)
                     
-                key = event.getKeys(keyList=['c', 'm'])
+                else:
+                    to_output_eyetracking(subject_id, 'did not catch eye data, possibly blinked', 'or corrupted', getTime(), trigger, output_eye_dir)
+                    
+                if (trigger == 3001):
+                    key = event.getKeys(keyList=['c', 'm'])
+                    if key!=[]:
+                        break
                 #print('key event draw gaze dot', key)
-                if key!=[]:
-                    break
                 
             return 0
         
@@ -513,24 +431,22 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         
         tracker.setRecordingState(True)
         
-        #draw instruction (1)
+        #draw instruction before experiment start
         
-        #inst1.image = 'Instructions\Inst.png'
-        inst1 = visual.TextStim(win, text='Instruction', pos = [0,0],
+        inst_dir = 'Instructions\\Inst_2.jpg'
+        instr=visual.ImageStim(win,image=inst_dir, units='pix', size = display_resolution)
+        instr.draw()
+        
+        '''inst1 = visual.TextStim(win, text='Instruction', pos = [0,0],
                                     height=24, color=[-1,-1,-1], colorSpace='rgb',
                                     alignHoriz='center', alignVert='center',
-                                    wrapWidth=win.size[0]*.9)
-        inst1.draw()
+                                    wrapWidth=win.size[0]*.9)'''
         
         flip_time=win.flip()
         self.hub.sendMessageEvent(text="EXPERIMENT_START",sec_time=flip_time)
         self.hub.clearEvents('all')
         
         key=event.waitKeys(keyList=['space'])
-        
-                            
-        #show logs window message with '1', proceed with space
-        #logs_windows('1', 'space')
         
          #------------------------------------------------------------Experiment trial testing ----------------------------------------------------------------------------------------------
         
@@ -552,13 +468,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         print('display', "{0}".format(display.getIndex()), 'pixel resolution', "{0}".format(display.getPixelResolution()), 'coordinate type', "{0}".format(display.getCoordinateType()))
         print('pixels degree', "{0}".format(display.getPixelsPerDegree()), 'selected eyetracker', selected_eyetracker_name)
 
-        #show logs window message with '2', proceed with space
-        #logs_windows('2', 'space')
-
         self.hub.clearEvents('all')         # why here clear events
-        
-        #show logs window message with '3', proceed with space
-        #logs_windows('3', 'space')
 
         #trials.printAsText() #does not work
         #tracker.getLastGazePosition()
@@ -569,23 +479,12 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             self.hub.clearEvents('all')
             
             item_number = random.randrange(2, 11, 1)
-            #print(item_number)
-            
-            #show logs window message with '4', proceed with space
-            #logs_windows('4', 'space')
             
             trigger_value=1001
             draw_trigger(win, tracker, trigger_value, item_number,csv_experiment_output, csv_eye_output) #the row indexing starts from 2
-            #draw_gaze_dot(win, trigger_value)
-            
-            #show logs window message with '5', proceed with space
-            #logs_windows('5', 'space')
             
             trigger_value=2001
             draw_trigger(win, tracker, trigger_value, item_number, csv_experiment_output, csv_eye_output)
-            
-            #show logs window message with '6', proceed with space
-            #logs_windows('6', 'space')
             
             trigger_value=3001
             draw_trigger(win, tracker, trigger_value, item_number, csv_experiment_output, csv_eye_output)
