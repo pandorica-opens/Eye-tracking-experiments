@@ -87,6 +87,9 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         def to_output(subject_id, decision, trigger_value, input_decision, output_file_dir):
 
             import os.path 
+            
+            input_decision.insert(6, 'choice m (right):')
+            input_decision.insert(0, 'choice c (left):')
 
             is_exist = False
             if os.path.exists(output_file_dir): is_exist = True
@@ -222,6 +225,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
                 print('precise timing bl', timer.getTime())'''
 
             draw_gaze_dot(win, 1001, 0.5, output_eye_dir)
+            self.hub.clearEvents('all')
         
         def instructions_fixation_cross(win, output_eye_dir):
 
@@ -234,7 +238,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             win.flip()
             
             #uncomment in case we want to see the fixation
-            draw_gaze_dot(win, 2001, 0.5, output_eye_dir) #change 1 second to 0.5 seconds
+            draw_gaze_dot(win, 2001, 0.5, output_eye_dir) #change 0.5 seconds
 
             #uncomment in case of coordinate monitor greed 
             #monitor_coordinate_check(win)
@@ -242,10 +246,11 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             #comment in case of monitor coordinate check
             #win.flip() 
             fixation_cross.autoDraw = False
+            self.hub.clearEvents('all')
             
         def draw_table_lines(win):
             table_rectangle = visual.ShapeStim(win, units='pix', lineWidth=1.5,
-                                            lineColor=(25,25,255),lineColorSpace='rgb255', 
+                                            lineColor=(25,25,25),lineColorSpace='rgb255', 
                                             vertices=((-225, 375), (200,375),(200,-395),(-225,-395)),
                                             closeShape=True,
                                             pos=(0, 0), size=1)
@@ -306,11 +311,10 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             
             draw_table_lines(win)
             draw_input(win, item_list_text, item_array_x, item_array_y)
-            draw_gaze_dot(win, 3001, 10000, output_eye_dir)
+            choice = draw_gaze_dot(win, 3001, 10000, output_eye_dir)
             
             #comment in case want to see gazedot
-            #key=event.waitKeys(keyList=['c', 'm']) 
-            return key
+            return choice
     
         def draw_trigger(win, tracker, trigger, item_number, output_file_dir, output_eye_dir):
             
@@ -325,28 +329,24 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             
             tracker.setTriggerValue(trigger)
             input_to_make_decision = read_input_file(input_file_dir, item_number)
-            #print(input_to_make_decision, type(input_to_make_decision), ''.join(input_to_make_decision))
-            
             input_to_make_decision_split = ''.join(input_to_make_decision)
             input_to_make_decision_split = row_to_condition(input_to_make_decision_split)
-            #print(input_to_make_decision_split)
-            
-            #change x,y, gazetime while testing with eyetribe
+            #default gazetime and eyedata
             x,y,gazetime = 'did not catch', 'eyedata, possibly blinked', 30
 
             
             if (trigger == 1001):
                 instructions_blank_screen(win, output_eye_dir)
-                to_output(subject_id, 'space', trigger, input_to_make_decision, output_file_dir)
+                to_output(subject_id, 'no choice', trigger, input_to_make_decision_split, output_file_dir)
                 
             
             if (trigger == 2001):
                 instructions_fixation_cross(win, output_eye_dir,)
-                to_output(subject_id, 'space', trigger, input_to_make_decision, output_file_dir)
+                to_output(subject_id, 'no choice', trigger, input_to_make_decision_split, output_file_dir)
                 
             if (trigger == 3001):
                 choice = instructions_choice_decision(win, input_to_make_decision_split, output_eye_dir)
-                to_output(subject_id, choice, trigger, input_to_make_decision, output_file_dir)
+                to_output(subject_id, choice, trigger, input_to_make_decision_split, output_file_dir)
                 
             
             flip_time=win.flip()
@@ -363,9 +363,11 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             #screens.  
             
             stime = getTime()
+            #print(stime)
         
             while getTime()-stime < time:
                 gpos = tracker.getPosition()
+                #print('start time', stime, 'actual time', getTime(), 'difference', getTime()-stime, 'until <',time)
 
                 if (gpos != None):
                     start_message = visual.TextStim(win, text='+', pos = [gpos[0],gpos[1]], height=10,color=[-1,-1,-1],colorSpace='rgb',wrapWidth=win.size[0])
@@ -375,17 +377,22 @@ class ExperimentRuntime(ioHubExperimentRuntime):
                     #start_message.draw()
                     win.flip(clearBuffer=False)
                     to_output_eyetracking(subject_id, gpos[0], gpos[1], getTime(), trigger, output_eye_dir)
-                    core.wait(0.005)
+                    core.wait(0.001)
                     
                 else:
-                    to_output_eyetracking(subject_id, 'did not catch eye data, possibly blinked', 'or corrupted', getTime(), trigger, output_eye_dir)
-                    
+                    to_output_eyetracking(subject_id, 'did not catch eye data, possibly blinked', 'or corrupted',
+                    getTime(), trigger, output_eye_dir) #getTime gives current time, here should probably print getTime from inside while
+                
+                self.hub.clearEvents('all') 
+                
                 if (trigger == 3001):
                     key = event.getKeys(keyList=['c', 'm'])
                     if key!=[]:
-                        break
-                #print('key event draw gaze dot', key)
+                        print('choice key', key, trigger)
+                        return key[0]
                 
+            self.hub.clearEvents('all')
+            print('events after clear events', event.getKeys(keyList=['c', 'm']))
             return 0
         
 
@@ -508,13 +515,15 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         tracker.setRecordingState(False)
         tracker.setConnectionState(False)
         
-        logs_windows("The experiment is complete. Press ''escape'' to exit", 'escape')
+        logs_windows("Thank you for your participation! Press ''escape'' to exit", 'escape')
         print('checkquit escape')
         _checkQuit(key)
         
         self.hub.sendMessageEvent(text="SHOW_DONE_TEXT")
 
         tex1=eventtxt.Eventtotext()
+        print('tex1=eventtxt.Eventtotext()', tex1)
+        #use try: would give an error in case of the not connected eye tracker at later stages
         tex1.convertToText(exp_script_dir,subject_id,localtime)
         self.hub.clearEvents('all')
         #self.hub.clearEvents('all', exp_script_dir) 
@@ -658,16 +667,16 @@ if __name__ == "__main__":
 
 
         runtime=ExperimentRuntime(configurationDirectory, "experiment_config.yaml")
-        print('after runtime')
+        #print('after runtime')
         runtime.start((dlg_info.values()[0],))
-        print('after runtime info ')
+        #print('after runtime info ')
         os.remove(configurationDirectory+"\events.hdf5")#this line to remove the hdf5 so in the next run of the expermint will not append
-        print('after remove')
+        #print('after remove')
         
         if dlg_info.values()[0] =='The Eye Tribe':
             s.terminate()
             p.terminate()
-        print('after terminate s,p')
+        #print('after terminate s,p')
 
     # Get the current directory, using a method that does not rely on __FILE__
     # or the accuracy of the value of __FILE__.

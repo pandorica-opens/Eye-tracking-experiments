@@ -17,8 +17,8 @@
       !!python/unicode unit_type: !!python/unicode mm}
     !!python/unicode device_number: 0
     !!python/unicode name: !!python/unicode display
-    !!python/unicode physical_dimensions: {!!python/unicode height: 340, !!python/unicode unit_type: !!python/unicode mm,
-      !!python/unicode width: 590}
+    !!python/unicode physical_dimensions: {!!python/unicode height: 900, !!python/unicode unit_type: !!python/unicode mm,
+      !!python/unicode width: 1600}
     !!python/unicode psychopy_monitor_name: !!python/unicode default
     !!python/unicode reporting_unit_type: !!python/unicode pix
 - !!python/unicode eyetracker.hw.theeyetribe.EyeTracker:
