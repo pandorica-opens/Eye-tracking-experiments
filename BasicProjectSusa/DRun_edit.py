@@ -84,19 +84,18 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         ###########
         #### Experiment functions
         ###########
-        def to_output(subject_id, decision, trigger_value, input_decision, output_file_dir):
+        def to_output(subject_id, decision, trigger_value, i_d, output_file_dir, reaction_time, reaction_time_decision_scren):
 
             import os.path 
-            
-            input_decision.insert(6, 'choice m (right):')
-            input_decision.insert(0, 'choice c (left):')
+            global con
 
             is_exist = False
             if os.path.exists(output_file_dir): is_exist = True
 
             # Add header to the output file if it is the first time to write to it...
             if not is_exist:    
-                output_data_headers = ['Subject_id', 'Decision', 'Trigger','Input of made choice']
+                output_data_headers = ['Subject_id','Condition', 'Decision', 'Trigger','Item number', 'c1','c2','c3','c4','c5','c6',
+                'm1','m2','m3','m4','m5','m6', 'Reaction time', 'Reaction time since decision screen start']
                       
 
             # Python 2
@@ -106,10 +105,13 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             #with open(output_file_dir, 'a', newline = '') as f:
 
                 writer = csv.writer(f)
+                
                 if not is_exist:
                     writer.writerows([output_data_headers])
-                
-                writer.writerows([[subject_id, decision, trigger_value, input_decision]])
+                writer.writerows([[subject_id, con, decision, trigger_value, 
+                i_d[0],i_d[1],i_d[2],i_d[3],i_d[4],i_d[5],
+                i_d[6],i_d[7],i_d[8],i_d[9],i_d[10],i_d[11],i_d[12],
+                reaction_time, reaction_time_decision_scren]])
                 
         def to_output_eyetracking(subject_id, x, y, gazetime, trigger, output_eye_file_dir):
 
@@ -184,6 +186,16 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             win.flip()
             
         def draw_input(win, item_array_text, item_array_x, item_array_y):
+            global con
+            
+            item_left = item_array_text[1:7]
+            item_right = item_array_text[7:13]
+            print(item_array_text, item_left, item_right)
+            random.Random(con).shuffle(item_left)
+            random.Random(con).shuffle(item_right)
+            print(item_array_text, item_left, item_right)
+            item_array_text_shuffled = item_left + item_right
+            print(item_array_text_shuffled)
             
             for i in range(len(item_array_x)):
                 #print(item_array_x[i], item_array_y[i], i, len(item_array_x), len(item_array_text), item_array_text)
@@ -199,7 +211,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
                 #uncomment white box in case want to create different background on values
                 #whitebox.draw() 
                 
-                item_value = visual.TextStim(win, text=item_array_text[i+1], height=21, units='pix', #here we use i+1 because the first number is numbers item
+                item_value = visual.TextStim(win, text=item_array_text_shuffled[i], height=14, units='pix', #here we use i+1 because the first number is numbers item
                 pos = [item_array_x[i],item_array_y[i]],color=[0,0,0],colorSpace='rgb255')
                 
                 item_value.draw()
@@ -249,6 +261,9 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             self.hub.clearEvents('all')
             
         def draw_table_lines(win):
+            global con
+            print('con', con)
+            
             table_rectangle = visual.ShapeStim(win, units='pix', lineWidth=1.5,
                                             lineColor=(25,25,25),lineColorSpace='rgb255', 
                                             vertices=((-225, 375), (200,375),(200,-395),(-225,-395)),
@@ -273,20 +288,23 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             line_dotted4 = visual.Line(win, start=(-660, -70), end=(650, -70),lineColor=(25,25,25),lineColorSpace='rgb255')
             line_dotted5 = visual.Line(win, start=(-660, -175), end=(650, -175),lineColor=(25,25,25),lineColorSpace='rgb255')
             line_dotted6 = visual.Line(win, start=(-660, -284), end=(650, -284),lineColor=(25,25,25),lineColorSpace='rgb255')
+            
             text = ['Number of participating countries', 'Costs to average household per \n month',
             'Share of emission represented by \nparticipating countries', 'Distribution of cost from \nimplementing the agreement',
-            'Sanctions for missing emission \nreduction targets', 'Monitoring: Emission reductions \nwill be monitored by', 'Agreement 1',
-            'Agreement 2']
+            'Sanctions for missing emission \nreduction targets', 'Monitoring: Emission reductions \nwill be monitored by']
+            
+            #shuffle text, put text items in an array
+            random.Random(con).shuffle(text)
             
             for i in range(6):
                 start_message = visual.TextStim(win, text=text[i], pos = [-640,215-i*112], 
                                                 height=24,color=[25,25,25],colorSpace='rgb255'
                                                 ,wrapWidth=win.size[0]*.9, alignHoriz='left')
                 start_message.draw()
-                
-            agreement_message1 = visual.TextStim(win, text=text[6], pos = [-15,355], height=24,color=[25,25,25],colorSpace='rgb255',wrapWidth=win.size[0]*.9)
+            agreement_message =('Agreement 1','Agreement 2')
+            agreement_message1 = visual.TextStim(win, text=agreement_message[0], pos = [-15,355], height=24,color=[25,25,25],colorSpace='rgb255',wrapWidth=win.size[0]*.9)
             agreement_message1.draw()
-            agreement_message2 = visual.TextStim(win, text=text[7], pos = [440,355], height=24,color=[25,25,25],colorSpace='rgb255',wrapWidth=win.size[0]*.9)
+            agreement_message2 = visual.TextStim(win, text=agreement_message[1], pos = [440,355], height=24,color=[25,25,25],colorSpace='rgb255',wrapWidth=win.size[0]*.9)
             agreement_message2.draw()
                 
             table_rectangle.draw()
@@ -311,10 +329,10 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             
             draw_table_lines(win)
             draw_input(win, item_list_text, item_array_x, item_array_y)
-            choice = draw_gaze_dot(win, 3001, 10000, output_eye_dir)
+            (choice, time_all, time_trial) = draw_gaze_dot(win, 3001, 10000, output_eye_dir)
             
             #comment in case want to see gazedot
-            return choice
+            return (choice, time_all, time_trial) 
     
         def draw_trigger(win, tracker, trigger, item_number, output_file_dir, output_eye_dir):
             
@@ -337,16 +355,13 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             
             if (trigger == 1001):
                 instructions_blank_screen(win, output_eye_dir)
-                to_output(subject_id, 'no choice', trigger, input_to_make_decision_split, output_file_dir)
-                
             
             if (trigger == 2001):
                 instructions_fixation_cross(win, output_eye_dir,)
-                to_output(subject_id, 'no choice', trigger, input_to_make_decision_split, output_file_dir)
                 
             if (trigger == 3001):
-                choice = instructions_choice_decision(win, input_to_make_decision_split, output_eye_dir)
-                to_output(subject_id, choice, trigger, input_to_make_decision_split, output_file_dir)
+                choice, choice_time_whole, choice_time_decision_screen  = instructions_choice_decision(win, input_to_make_decision_split, output_eye_dir)
+                to_output(subject_id, choice, trigger, input_to_make_decision_split, output_file_dir, choice_time_whole, choice_time_decision_screen)
                 
             
             flip_time=win.flip()
@@ -388,8 +403,8 @@ class ExperimentRuntime(ioHubExperimentRuntime):
                 if (trigger == 3001):
                     key = event.getKeys(keyList=['c', 'm'])
                     if key!=[]:
-                        print('choice key', key, trigger)
-                        return key[0]
+                        print('choice key', key, trigger, getTime())
+                        return (key[0], getTime(), getTime()-stime)
                 
             self.hub.clearEvents('all')
             print('events after clear events', event.getKeys(keyList=['c', 'm']))
@@ -475,17 +490,14 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         print('display', "{0}".format(display.getIndex()), 'pixel resolution', "{0}".format(display.getPixelResolution()), 'coordinate type', "{0}".format(display.getCoordinateType()))
         print('pixels degree', "{0}".format(display.getPixelsPerDegree()), 'selected eyetracker', selected_eyetracker_name)
 
-        self.hub.clearEvents('all')         # why here clear events
-
-        #trials.printAsText() #does not work
-        #tracker.getLastGazePosition()
-
+        self.hub.clearEvents('all')
         
         for t in range(2): #number of trials is 10
             self.hub.sendMessageEvent(text="TRIAL_START")
             self.hub.clearEvents('all')
-            
+            #uncomment for trials, here item number 1 is used only for testing purposes
             item_number = random.randrange(2, 11, 1)
+            #item_number = 2
             
             trigger_value=1001
             draw_trigger(win, tracker, trigger_value, item_number,csv_experiment_output, csv_eye_output) #the row indexing starts from 2
