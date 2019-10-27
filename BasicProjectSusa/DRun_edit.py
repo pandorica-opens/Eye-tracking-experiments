@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 """
 eye_tracker/run.py
-
 Demonstrates the ioHub Common EyeTracking Interface by displaying a gaze cursor
 at the currently reported gaze position on an image background.
 All currently supported Eye Tracker Implementations are supported,
 with the Eye Tracker Technology chosen at the start of the demo via a
 drop down list. Exact same demo script is used regardless of the
 Eye Tracker hardware used.
-
 Inital Version: May 6th, 2013, Sol Simpson
 """
 from psychopy import visual, event, core, logging
@@ -20,7 +18,7 @@ from psychopy.iohub import (EventConstants, EyeTrackerConstants,
 import os
 import random
 import site
-site.addsitedir('C:\Users\Standard\Miniconda2\Lib\site-packages')
+site.addsitedir('C:\Python27\Lib\site-packages')
 from psynteract import Connection 
 import psynteract
 import socket
@@ -183,38 +181,32 @@ class ExperimentRuntime(ioHubExperimentRuntime):
                 pixel_name_y.draw()
             
            
-            win.flip()
+            #win.flip()
             
-        def draw_input(win, item_array_text, item_array_x, item_array_y):
+        def draw_input(win, item_array_text, item_array_x):
             global con
             
             item_left = item_array_text[1:7]
             item_right = item_array_text[7:13]
             print(item_array_text, item_left, item_right)
-            random.Random(con).shuffle(item_left)
-            random.Random(con).shuffle(item_right)
+            #random.Random(con).shuffle(item_left)
+            #random.Random(con).shuffle(item_right)
             print(item_array_text, item_left, item_right)
             item_array_text_shuffled = item_left + item_right
             print(item_array_text_shuffled)
             
-            for i in range(len(item_array_x)):
+            for i in range(len(item_array_text_shuffled)):
                 #print(item_array_x[i], item_array_y[i], i, len(item_array_x), len(item_array_text), item_array_text)
-                whitebox = visual.ShapeStim(win, units='pix', lineWidth=1.5,
-                                            lineColor=(255,255,255),lineColorSpace='rgb255', 
-                                            vertices=((item_array_x[i]+20, item_array_y[i]+20),
-                                            (item_array_x[i]+20, item_array_y[i]-20),
-                                            (item_array_x[i]-20, item_array_y[i]-20),
-                                            (item_array_x[i]-20, item_array_y[i]+20)),
-                                            closeShape=True, 
-                                            fillColor = (255,255,255), fillColorSpace='rgb255',
-                                            pos=(0, 0), size=1) #what size param
-                #uncomment white box in case want to create different background on values
-                #whitebox.draw() 
                 
-                item_value = visual.TextStim(win, text=item_array_text_shuffled[i], height=14, units='pix', #here we use i+1 because the first number is numbers item
-                pos = [item_array_x[i],item_array_y[i]],color=[0,0,0],colorSpace='rgb255')
+                if (i<6):
+                    item_values = visual.TextStim(win, text=item_array_text_shuffled[i], height=14, units='pix', #here we use i+1 because the first number is numbers item
+                    pos = [item_array_x[i],225-120*i],color=[0,0,0],colorSpace='rgb255')
                 
-                item_value.draw()
+                if (i>5):
+                    item_values = visual.TextStim(win, text=item_array_text_shuffled[i], height=14, units='pix', #here we use i+1 because the first number is numbers item
+                    pos = [item_array_x[i],225-120*(i-6)],color=[0,0,0],colorSpace='rgb255')
+                    
+                item_values.draw()
                 
             win.flip(clearBuffer=False)
             
@@ -229,94 +221,71 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             return key
 
         def instructions_blank_screen(win, output_eye_dir):
-            
-            #uncomment in case want to draw gaze dot
-            '''timer = core.Clock()
-            timer.add(0.5)
-            while timer.getTime()<0:
-                print('precise timing bl', timer.getTime())'''
 
             draw_gaze_dot(win, 1001, 0.5, output_eye_dir)
             self.hub.clearEvents('all')
         
         def instructions_fixation_cross(win, output_eye_dir):
-
-            #inst_dir = 'Instructions\\fixation_cross.jpg'
-            #instr=visual.ImageStim(win,image=inst_dir, units='pix', size = display_resolution)
-            #instr.draw()
             
-            fixation_cross = visual.TextStim(win, text='+', pos = [-595,345], height=54,color=[-1,-1,-1],colorSpace='rgb')
+            fixation_cross = visual.TextStim(win, text='+', pos = [-650,385], height=54,color=[-1,-1,-1],colorSpace='rgb')
             fixation_cross.autoDraw = True
             win.flip()
             
             #uncomment in case we want to see the fixation
             draw_gaze_dot(win, 2001, 0.5, output_eye_dir) #change 0.5 seconds
-
-            #uncomment in case of coordinate monitor greed 
-            #monitor_coordinate_check(win)
             
-            #comment in case of monitor coordinate check
-            #win.flip() 
             fixation_cross.autoDraw = False
             self.hub.clearEvents('all')
             
         def draw_table_lines(win):
             global con
-            print('con', con)
+            print('con', con, 'display resolution', display_resolution)
             
             table_rectangle = visual.ShapeStim(win, units='pix', lineWidth=1.5,
                                             lineColor=(25,25,25),lineColorSpace='rgb255', 
-                                            vertices=((-225, 375), (200,375),(200,-395),(-225,-395)),
+                                            vertices=((-225, 430), (255,430),(255,-430),(-225,-430)),
                                             closeShape=True,
                                             pos=(0, 0), size=1)
             table_rectangle2 = visual.ShapeStim(win, units='pix', lineWidth=1.5,
                                             lineColor=(25,25,25),lineColorSpace='rgb255', 
-                                            vertices=((235, 375), (650,375),(650,-395),(235,-395)),
+                                            vertices=((285, 430), (760,430),(760,-430),(285,-430)),
                                             closeShape=True,
                                             pos=(0, 0), size=1)
             line1 = visual.ShapeStim(win, units='pix', lineWidth=1.5,
                                             lineColor=(25,25,25),lineColorSpace='rgb255', 
-                                            vertices=((-225, 327), (200,327)),
+                                            vertices=((-225, 327), (255,327)),
                                             pos=(0, 0), size=1)
             line2 = visual.ShapeStim(win, units='pix', lineWidth=1.5,
                                             lineColor=(25,25,25),lineColorSpace='rgb255', 
-                                            vertices=((235, 327), (650,327)),
+                                            vertices=((285, 327), (760,327)),
                                             pos=(0, 0), size=1)
-            line_dotted1 = visual.Line(win, start=(-660, 280), end=(650, 280),lineColor=(25,25,25),lineColorSpace='rgb255')
-            line_dotted2 = visual.Line(win, start=(-660, 148), end=(650, 148),lineColor=(25,25,25),lineColorSpace='rgb255')
-            line_dotted3 = visual.Line(win, start=(-660, 40), end=(650, 40),lineColor=(25,25,25),lineColorSpace='rgb255')
-            line_dotted4 = visual.Line(win, start=(-660, -70), end=(650, -70),lineColor=(25,25,25),lineColorSpace='rgb255')
-            line_dotted5 = visual.Line(win, start=(-660, -175), end=(650, -175),lineColor=(25,25,25),lineColorSpace='rgb255')
-            line_dotted6 = visual.Line(win, start=(-660, -284), end=(650, -284),lineColor=(25,25,25),lineColorSpace='rgb255')
             
-            text = ['Number of participating countries', 'Costs to average household per \n month',
+            text = ['Number of participating countries', 'Costs to average household per \nmonth',
             'Share of emission represented by \nparticipating countries', 'Distribution of cost from \nimplementing the agreement',
             'Sanctions for missing emission \nreduction targets', 'Monitoring: Emission reductions \nwill be monitored by']
             
             #shuffle text, put text items in an array
-            random.Random(con).shuffle(text)
+            #random.Random(con).shuffle(text)
             
             for i in range(6):
-                start_message = visual.TextStim(win, text=text[i], pos = [-640,215-i*112], 
-                                                height=24,color=[25,25,25],colorSpace='rgb255'
+                start_message = visual.TextStim(win, text=text[i], pos = [-750,225-i*120], 
+                                                height=16,color=[25,25,25],colorSpace='rgb255'
                                                 ,wrapWidth=win.size[0]*.9, alignHoriz='left')
+                line_dotted = visual.Line(win, start=(-760, 280-120*i), end=(760, 280-120*i),lineColor=(25,25,25),lineColorSpace='rgb255')
+                line_dotted.draw()
                 start_message.draw()
+                
             agreement_message =('Agreement 1','Agreement 2')
-            agreement_message1 = visual.TextStim(win, text=agreement_message[0], pos = [-15,355], height=24,color=[25,25,25],colorSpace='rgb255',wrapWidth=win.size[0]*.9)
+            agreement_message1 = visual.TextStim(win, text=agreement_message[0], pos = [15,385], height=16,color=[25,25,25],colorSpace='rgb255',wrapWidth=win.size[0]*.9)
             agreement_message1.draw()
-            agreement_message2 = visual.TextStim(win, text=agreement_message[1], pos = [440,355], height=24,color=[25,25,25],colorSpace='rgb255',wrapWidth=win.size[0]*.9)
+            agreement_message2 = visual.TextStim(win, text=agreement_message[1], pos = [525,385], height=16,color=[25,25,25],colorSpace='rgb255',wrapWidth=win.size[0]*.9)
             agreement_message2.draw()
                 
             table_rectangle.draw()
             table_rectangle2.draw()
             line1.draw()
             line2.draw()
-            line_dotted1.draw()
-            line_dotted2.draw()
-            line_dotted3.draw()
-            line_dotted4.draw()
-            line_dotted5.draw()
-            line_dotted6.draw()
+            #monitor_coordinate_check(win)
             
         def instructions_choice_decision(win, item_list_text, output_eye_dir):
             #uncomment in case we want to compare with table from the presentation experiment requirements
@@ -324,11 +293,10 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             #instr=visual.ImageStim(win,image=inst_dir, units='pix', size = display_resolution)
             #instr.draw()
            
-            item_array_x = np.array([-15, -15, -15, -15,-15, -15, 445, 445, 445, 445, 445, 445])
-            item_array_y = np.array([215,105,-5,-115,-225,-335,215,105,-5,-115,-225,-335])
+            item_array_x = np.array([15, 15, 15, 15,15, 15, 525, 525, 525, 525, 525, 525])
             
             draw_table_lines(win)
-            draw_input(win, item_list_text, item_array_x, item_array_y)
+            draw_input(win, item_list_text, item_array_x)
             (choice, time_all, time_trial) = draw_gaze_dot(win, 3001, 10000, output_eye_dir)
             
             #comment in case want to see gazedot
