@@ -415,18 +415,9 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             
         def calculate_code(win, payoff):
             
-            text = "Vielen Dank für Ihre Teilnahme am Experiment. Das Experiment ist hiermit beendet. Bitte notieren Sie sich den unten angegebenen Code auf dem dafür vorgesehenen Blatt Papier. Nehmen Sie sowohl dieses Blatt, als auch Ihre Sitznummer mit und bewegen Sie sich langsam nach draußen. Dort werden Sie vom Experimentator die Auszahlung erhalten."
+            text = "Thank you for partification! During 30 trials you solved " + str(payoff) + ' trials correctly, which means you will recieve ' + str(payoff*0.10)+ 'euro for your performance in task.'
             text_obj = visual.TextStim(win, text=text, height=20, pos = [0, 200], units='pix', wrapWidth=win.size[0]*.7, alignHoriz='center')
             text_obj.draw()
-            
-            code = ''
-            for l in range(0, len(str(payoff))):
-                if payoff[l] in code_table:
-                    code += code_table[payoff[l]]
-                    
-            code_text = visual.TextStim(win, text="Code: " + code, height=40, units='pix', pos = [0,0],color=[255,255,255],colorSpace='rgb255', wrapWidth=win.size[0]*.7)
-            code_text.draw()
-                
             win.flip()
             
         #****************Collect Information about the Subject****************************
@@ -521,6 +512,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
 
         experiment_results = []
         t = 0
+        sum_correct = 0
         for round_data in main_data:
             t += 1
             flip_time=win.flip()
@@ -528,6 +520,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             time.sleep(0.5)
             
             round_results = do_round(win, round_data, is_trial = False)
+            sum_correct = sum_correct + int(round_results['correct_answer'])
             
             experiment_results.append(round_results)
             
@@ -536,7 +529,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
 
             flip_time=win.flip()
             
-            
+        print('sum', sum_correct)
         to_output(subj_id, condition, exp_time, experiment_results, csv_experiment_output)
                      
         #------------------------------------------------------------ Main Experiment Ends ----------------------------------------------------------------------------------------------
@@ -552,6 +545,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
                 selected_round_data = round_data
                                 
         draw_payoff(win, selected_round_data, selected_round_results, trial_id=selected_round_idx+1)
+        calculate_code(win, sum_correct)
         
         event.waitKeys(keyList=['f2'])
         
