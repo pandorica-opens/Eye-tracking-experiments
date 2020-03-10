@@ -25,7 +25,7 @@ import csv
 import time
 import random
 
-welcome_screen = 'welcome screen.PNG'
+welcome_screen = 'welcome screen.JPG'
 
 
 input_file_dir = 'Input_file.csv'
@@ -152,7 +152,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
 
                 
         def experiment_begins(win):
-            text = "Sie haben die Probedurchgänge nun abgeschlossen. Nun beginnt das eigentliche Experiment, welches auszahlungsrelevant wird. \nDer nächste Teil wird ca. 10 Minuten dauern. Sie können in diesen 10 Minuten keine Pausen einlegen.\
+            text = "Sie haben die Probedurchgänge nun abgeschlossen. Nun beginnt das eigentliche Experiment, welches auszahlungsrelevant wird. \nDer nächste Teil wird ca. 5 Minuten dauern. Sie können in diesen 5 Minuten keine Pausen einlegen.\
             \nFalls Sie noch Fragen haben, melden Sie sich bitte jetzt beim Experimentator.\n\nFalls Sie keine Fragen mehr haben, drücken Sie bitte die Pfeiltaste nach rechts, um das Experiment zu beginnen."
             
             text_obj = visual.TextStim(win, text=text, height=30, alignHoriz='center', units='pix', pos = [0,0],color=[255,255,255],colorSpace='rgb255', wrapWidth=win.size[0]*.7)
@@ -283,7 +283,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             win.flip()
 
         def fixation_cross(win):
-            fixation_cross = visual.TextStim(win, text='+', pos = [0,0], units='pix', height=20,color=[255,255,255],colorSpace='rgb255',wrapWidth=win.size[0]*.5)
+            fixation_cross = visual.TextStim(win, text='+', pos = [0,0], units='pix', height=50,color=[255,255,255],colorSpace='rgb255',wrapWidth=win.size[0]*.5)
             fixation_cross.draw() 
             
             win.flip()
@@ -418,16 +418,19 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             
         def calculate_code(win, payoff):
             
-            text = "Thank you for partification! During 30 trials you solved " + str(payoff) + ' trials correctly, which means you will recieve ' + str(payoff*0.10)+ 'euro for your performance in task.'
-            text_obj = visual.TextStim(win, text=text, height=20, pos = [0, 200], units='pix', wrapWidth=win.size[0]*.7, alignHoriz='center')
+            text = "Der erste Teil des Experiments ist hiermit beendet. \n\nIn den ersten 30 Durchgängen haben Sie " + str(payoff) + ' Durchgänge richtig beantwortet. \nSie erhalten also ' + str(payoff*0.10)+ '€ zusätzlich ausgezahlt am Ende des Experiments.\
+            \n\n\n\n Bitte drücken Sie die Pfeiltaste nach rechts (-->)'
+            text_obj = visual.TextStim(win, text=text, height=30, pos = [0, 200], units='pix', wrapWidth=win.size[0]*.7, alignHoriz='center')
             text_obj.draw()
             win.flip()
             
         def calculate_code_second(win, payoff_first, payoff_second):
             
-            text = "Thank you for partification! During 30 trials in the first experiment you solved " + str(payoff_first) + ' trials correctly, which means you will recieve ' + str(payoff_first*0.10) + 'euro for your performance in task.' +" During 30 trials in the seconds experiment you solved " + str(payoff_second) + ' trials correctly, which means you will recieve ' + str(payoff_second*0.10)
+            text = "Das Experiment ist hiermit beendet.\n\nIn den zweiten 30 Durchgängen haben Sie " + str(payoff_second) + ' Durchgänge richtig beantwortet. Sie erhalten also hierfür also ' + str(payoff_second*0.10) + '€.\
+            \n' +"Da Sie im ersten Teil " + str(payoff_first*0.10) + "€ verdient haben, wird Ihnen der Experimentator nun "+str((payoff_first + payoff_second)*0.10)+"€ zusätzlich auszahlen.\
+            \n\n\nBitte bleiben Sie an Ihrem Platz sitzen und melden sich. Sie werden dann von Ihrem Platz abgeholt."
             
-            text_obj = visual.TextStim(win, text=text, height=20, pos = [0, 200], units='pix', wrapWidth=win.size[0]*.7, alignHoriz='center')
+            text_obj = visual.TextStim(win, text=text, height=30, pos = [0, 200], units='pix', wrapWidth=win.size[0]*.7, alignHoriz='center')
             text_obj.draw()
             win.flip()
             
