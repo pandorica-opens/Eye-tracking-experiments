@@ -27,7 +27,9 @@ import random
 
 welcome_screen = 'welcome screen.PNG'
 
+
 input_file_dir = 'Input_file.csv'
+input_file_dir2 = 'Input_file_2.csv'
 order_file_dir = 'order_input_file.csv'
 output_file_dir = 'Exp Results\\'+'output_file.csv'
 n_conditions = 8
@@ -140,17 +142,14 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             
             for round_data in trial_data:
                 
+                fixation_cross(win)
+                time.sleep(0.5)
                 
                 round_results = do_round(win, round_data, is_trial=True)
+                print('results',round_results, 'data', round_data)
                 draw_payoff(win, round_data, round_results, trial_id=None)
                 win.flip() 
-                
-            k = event.waitKeys(keyList=['f2', 'right'])
-            if k[0] == 'f2':
-                win.close()
-                core.quit()
-            elif k[0] == 'right':
-                pass
+
                 
         def experiment_begins(win):
             text = "Sie haben die Probedurchgänge nun abgeschlossen. Nun beginnt das eigentliche Experiment, welches auszahlungsrelevant wird. \nDer nächste Teil wird ca. 10 Minuten dauern. Sie können in diesen 10 Minuten keine Pausen einlegen.\
@@ -284,9 +283,11 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             win.flip()
 
         def fixation_cross(win):
-            fix = visual.TextStim(win, text='+', pos = [0,0], height=60,color=[255,255,255],colorSpace='rgb255',wrapWidth=win.size[0]*.5)
-            fix.draw()
+            fixation_cross = visual.TextStim(win, text='+', pos = [0,0], units='pix', height=20,color=[255,255,255],colorSpace='rgb255',wrapWidth=win.size[0]*.5)
+            fixation_cross.draw() 
+            
             win.flip()
+            
             
         def do_round(win, round_data, is_trial):
 
@@ -349,6 +350,8 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             #elif k[0] == ['up','down']:
             #    pass
             return results
+            
+        
 
         def draw_payoff(win, selected_round_data, selected_round_results, trial_id=None):
             global display_order
@@ -420,6 +423,14 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             text_obj.draw()
             win.flip()
             
+        def calculate_code_second(win, payoff_first, payoff_second):
+            
+            text = "Thank you for partification! During 30 trials in the first experiment you solved " + str(payoff_first) + ' trials correctly, which means you will recieve ' + str(payoff_first*0.10) + 'euro for your performance in task.' +" During 30 trials in the seconds experiment you solved " + str(payoff_second) + ' trials correctly, which means you will recieve ' + str(payoff_second*0.10)
+            
+            text_obj = visual.TextStim(win, text=text, height=20, pos = [0, 200], units='pix', wrapWidth=win.size[0]*.7, alignHoriz='center')
+            text_obj.draw()
+            win.flip()
+            
         #****************Collect Information about the Subject****************************
         
         selected_eyetracker_name=args[0]
@@ -439,6 +450,8 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         
        
         # it is recommended to use pixle as unit espically if you are using eye tracker, because the eyetracker returns the readings in pixel
+       
+        
         win=visual.Window(display_resolution,monitor=display.getPsychopyMonitorName(),units='pix',fullscr=True,screen= display.getIndex(),
         waitBlanking=False) #color="white"
         
@@ -461,7 +474,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         tracker.setRecordingState(True)
         
         
-        global order_file_dir, input_file_dir, output_file_dir, subj_id, condition, csv_experiment_output
+        global order_file_dir, input_file_dir, input_file_dir2, output_file_dir, subj_id, condition, csv_experiment_output
         
         
         #subj_id, condition = get_subject_info()
@@ -475,7 +488,10 @@ class ExperimentRuntime(ioHubExperimentRuntime):
 
 
         order_file_dir = exp_dir+'\\'+order_file_dir
+        
         input_file_dir = exp_dir+'\\'+input_file_dir
+        input_file_dir2 = exp_dir+'\\'+input_file_dir2
+        
         output_file_dir = exp_dir+'\\'+output_file_dir
 
 
@@ -510,32 +526,85 @@ class ExperimentRuntime(ioHubExperimentRuntime):
 
         #------------------------------------------------------------ Main Experiment Starts ----------------------------------------------------------------------------------------------
 
-        experiment_results = []
+        experiment_results_first = []
         t = 0
-        sum_correct = 0
+        sum_correct_first = 0
         for round_data in main_data:
             t += 1
             flip_time=win.flip()
             
             time.sleep(0.5)
             
-            round_results = do_round(win, round_data, is_trial = False)
-            sum_correct = sum_correct + int(round_results['correct_answer'])
+            fixation_cross(win)
             
-            experiment_results.append(round_results)
+            time.sleep(0.5)
+            
+            round_results = do_round(win, round_data, is_trial = False)
+            sum_correct_first = sum_correct_first + int(round_results['correct_answer'])
+            
+            experiment_results_first.append(round_results)
             
             
             win.flip()
 
             flip_time=win.flip()
             
-        print('sum', sum_correct)
-        to_output(subj_id, condition, exp_time, experiment_results, csv_experiment_output)
+        print('sum', sum_correct_first)
+        to_output(subj_id, condition, exp_time, experiment_results_first, csv_experiment_output)
                      
         #------------------------------------------------------------ Main Experiment Ends ----------------------------------------------------------------------------------------------
+        calculate_code(win, sum_correct_first)
+        
+        
+        event.waitKeys(keyList=['f2'])
+        
+        instruction_screen(win, 'second_part_1.jpg')
+        instruction_screen(win, 'second_part_2.jpg')
+        
+        
+        #------------------------------------------------------------ Main Experiment 2 Starts ----------------------------------------------------------------------------------------------
+        # get data...
+        all_data = read_input_file(input_file_dir2) 
+        trial_data = all_data[1:4]
+
+        fixed_data = all_data[4:9]
+        shuffled_data = all_data[9:]
+        random.shuffle(shuffled_data)
+        main_data = fixed_data + shuffled_data
+        
+        experiment_results_second = []
+        t = 0
+        sum_correct_second = 0
+        for round_data in main_data:
+            t += 1
+            flip_time=win.flip()
+            
+            time.sleep(0.5)
+            
+            fixation_cross(win)
+            
+            time.sleep(0.5)
+            
+            
+            round_results = do_round(win, round_data, is_trial = False)
+            sum_correct_second = sum_correct_second + int(round_results['correct_answer'])
+            
+            experiment_results_second.append(round_results)
+            
+            win.flip()
+
+            flip_time=win.flip()
+            
+        calculate_code_second(win, sum_correct_first, sum_correct_second)
+        
+        #print('sum', sum_correct)
+        to_output(subj_id, condition, exp_time, experiment_results_second, csv_experiment_output)
+                     
+        #------------------------------------------------------------ Main Experiment 2 Ends ----------------------------------------------------------------------------------------------
+                   
                        
-        #================= Draw Last Screen (Payoff) ==================
-        selected_round_idx = random.randint(0, len(experiment_results)-1)
+        #=============== Draw Last Screen (Payoff) ==================
+        '''selected_round_idx = random.randint(0, len(experiment_results)-1)
         selected_round_results = experiment_results[selected_round_idx]
                         
         selected_round_data = []
@@ -544,8 +613,8 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             if int(round_data[0]) == int(selected_round_results['picked_item']):
                 selected_round_data = round_data
                                 
-        draw_payoff(win, selected_round_data, selected_round_results, trial_id=selected_round_idx+1)
-        calculate_code(win, sum_correct)
+        #draw_payoff(win, selected_round_data, selected_round_results, trial_id=selected_round_idx+1)'''
+        
         
         event.waitKeys(keyList=['f2'])
         
