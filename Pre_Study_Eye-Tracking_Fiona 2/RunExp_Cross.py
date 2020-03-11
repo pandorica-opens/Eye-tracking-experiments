@@ -25,6 +25,8 @@ import csv
 import time
 import random
 
+
+
 welcome_screen = 'welcome screen.JPG'
 
 
@@ -55,7 +57,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
     def run(self,*args):
         
         from psychopy.iohub import module_directory
-        
+        global exp_script_dir
         exp_script_dir = module_directory(self.run)
         """
         The run method contains your experiment logic. It is equal to what would be in your main psychopy experiment
@@ -93,8 +95,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             win.flip()
             k = event.waitKeys(keyList=['f2', 'right'])
             if k[0] == 'f2':
-                win.close()
-                core.quit()
+                experiment_ends(win)
             elif k[0] == 'right':
                 pass
 
@@ -185,8 +186,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             to_output(subj_id, condition, exp_time, experiment_results, csv_experiment_output)
             k = event.waitKeys(keyList=['f2', 'up', 'down'])
             if k[0] == 'f2':
-                win.close()
-                core.quit()
+                experiment_ends(win)
             elif k[0] == 'up' or 'down':
                 pass
 
@@ -342,8 +342,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             #here we enforce to continue despite pressing the key, I have commented it out so you can remember what you were doing here
             #k = event.waitKeys(keyList=['f2', 'up', 'down'])
             if e[0] == 'f2':
-                win.close()
-                core.quit()
+               experiment_ends(win)
             #if k[0] == 'f2':
             #    win.close()
             #    core.quit()
@@ -411,8 +410,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             
             k = event.waitKeys(keyList=['f2', 'right'])
             if k[0] == 'f2':
-                win.close()
-                core.quit()
+                experiment_ends(win)
             elif k[0] == 'right':
                 pass
             
@@ -426,8 +424,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             
             k = event.waitKeys(keyList=['f2', 'right'])
             if k[0] == 'f2':
-                win.close()
-                core.quit()
+                experiment_ends(win)
             elif k[0] == 'right':
                 pass
             
@@ -441,11 +438,50 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             text_obj.draw()
             win.flip()
             
+        def experiment_ends(win):
+            # Disconnect the eye tracking device.
+            global exp_script_dir,subj_id, localtime, tracker
+            # So the experiment is done, all trials have been run.
+            # Clear the screen and show an 'experiment  done' message using the
+            # instructionScreen state. What for the trigger to exit that state.
+            # (i.e. the space key was pressed)
+            #
+            flip_time=win.flip()
+            self.hub.sendMessageEvent(text='EXPERIMENT_COMPLETE', sec_time=flip_time)
+            tracker.setRecordingState(False)
+            tracker.setConnectionState(False)
+            
+            self.hub.sendMessageEvent(text="SHOW_DONE_TEXT")
+            print("SHOW_DONE_TEXT")
+
+            tex1=eventtxt.Eventtotext()
+            print('tex1=eventtxt.Eventtotext()', tex1)
+            #use try: would give an error in case of the not connected eye tracker at later stages
+            tex1.convertToText(exp_script_dir,subj_id,localtime)
+            self.hub.clearEvents('all')
+            #self.hub.clearEvents('all', exp_script_dir) 
+            
+            # MANAGER ERROR WHEN SENDING MSG:[Errno 9] Bad file descriptor
+            #Warning: TimeoutExpired, Killing ioHub Server process.
+            
+            #ioHubExperimentRuntime.shutdown()
+            print('ioHubExperimentRuntime')
+            win.close()
+            self.hub.quit()
+            print('end of exp logic')
+        
+        
+        ### End of experiment logic
+        
+            
         #****************Collect Information about the Subject****************************
+        
+        global tracker, exp_script_dir, subj_id, localtime
         
         selected_eyetracker_name=args[0]
         
         # Let's make some short-cuts to the devices we will be using in this 'experiment'.
+        
         tracker=self.hub.devices.tracker
         display=self.hub.devices.display
         kb=self.hub.devices.keyboard
@@ -631,46 +667,9 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         
         event.waitKeys(keyList=['f2'])
         
+        
         #------------------------------------------------------------Experiment ends ----------------------------------------------------------------------------------------------
-
-        # Disconnect the eye tracking device.
-           
-        # So the experiment is done, all trials have been run.
-        # Clear the screen and show an 'experiment  done' message using the
-        # instructionScreen state. What for the trigger to exit that state.
-        # (i.e. the space key was pressed)
-        #
-        flip_time=win.flip()
-        self.hub.sendMessageEvent(text='EXPERIMENT_COMPLETE', sec_time=flip_time)
-        tracker.setRecordingState(False)
-        tracker.setConnectionState(False)
-        
-        self.hub.sendMessageEvent(text="SHOW_DONE_TEXT")
-        print("SHOW_DONE_TEXT")
-
-        tex1=eventtxt.Eventtotext()
-        print('tex1=eventtxt.Eventtotext()', tex1)
-        #use try: would give an error in case of the not connected eye tracker at later stages
-        tex1.convertToText(exp_script_dir,subj_id,localtime)
-        self.hub.clearEvents('all')
-        #self.hub.clearEvents('all', exp_script_dir) 
-        
-        # MANAGER ERROR WHEN SENDING MSG:[Errno 9] Bad file descriptor
-        #Warning: TimeoutExpired, Killing ioHub Server process.
-        
-        #ioHubExperimentRuntime.shutdown()
-        print('ioHubExperimentRuntime')
-        win.close()
-        self.hub.quit()
-        print('end of exp logic')
-        
-        
-        ### End of experiment logic
-        
-    
-    
-    
-    
+        experiment_ends(win)
         
 ####### Main  #######
 if __name__ == "__main__":
