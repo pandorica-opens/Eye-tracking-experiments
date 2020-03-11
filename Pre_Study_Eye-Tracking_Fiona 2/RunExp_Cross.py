@@ -418,16 +418,23 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             
         def calculate_code(win, payoff):
             
-            text = "Der erste Teil des Experiments ist hiermit beendet. \n\nIn den ersten 30 Durchgängen haben Sie " + str(payoff) + ' Durchgänge richtig beantwortet. \nSie erhalten also ' + str(payoff*0.10)+ '€ zusätzlich ausgezahlt am Ende des Experiments.\
+            text = "Der erste Teil des Experiments ist hiermit beendet. \n\nIn den ersten 30 Durchgängen haben Sie " + str(payoff) + ' Durchgänge richtig beantwortet. \nSie erhalten also ' + str(format(payoff*0.10, '.2f'))+ '€ zusätzlich ausgezahlt am Ende des Experiments.\
             \n\n\n\n Bitte drücken Sie die Pfeiltaste nach rechts (-->)'
             text_obj = visual.TextStim(win, text=text, height=30, pos = [0, 200], units='pix', wrapWidth=win.size[0]*.7, alignHoriz='center')
             text_obj.draw()
             win.flip()
             
+            k = event.waitKeys(keyList=['f2', 'right'])
+            if k[0] == 'f2':
+                win.close()
+                core.quit()
+            elif k[0] == 'right':
+                pass
+            
         def calculate_code_second(win, payoff_first, payoff_second):
             
-            text = "Das Experiment ist hiermit beendet.\n\nIn den zweiten 30 Durchgängen haben Sie " + str(payoff_second) + ' Durchgänge richtig beantwortet. Sie erhalten also hierfür also ' + str(payoff_second*0.10) + '€.\
-            \n' +"Da Sie im ersten Teil " + str(payoff_first*0.10) + "€ verdient haben, wird Ihnen der Experimentator nun "+str((payoff_first + payoff_second)*0.10)+"€ zusätzlich auszahlen.\
+            text = "Das Experiment ist hiermit beendet.\n\nIn den zweiten 30 Durchgängen haben Sie " + str(payoff_second) + ' Durchgänge richtig beantwortet. Sie erhalten also hierfür also ' + str(format(payoff_second*0.10, '.2f')) + '€.\
+            \n' +"Da Sie im ersten Teil " + str(format(payoff_first*0.10, '.2f')) + "€ verdient haben, wird Ihnen der Experimentator nun "+ str(format((payoff_first + payoff_second)*0.10, '.2f'))+"€ zusätzlich auszahlen.\
             \n\n\nBitte bleiben Sie an Ihrem Platz sitzen und melden sich. Sie werden dann von Ihrem Platz abgeholt."
             
             text_obj = visual.TextStim(win, text=text, height=30, pos = [0, 200], units='pix', wrapWidth=win.size[0]*.7, alignHoriz='center')
@@ -534,6 +541,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         sum_correct_first = 0
         for round_data in main_data:
             t += 1
+            tracker.setTriggerValue(1000+t)
             flip_time=win.flip()
             
             time.sleep(0.5)
@@ -552,14 +560,13 @@ class ExperimentRuntime(ioHubExperimentRuntime):
 
             flip_time=win.flip()
             
+        tracker.setTriggerValue(1500)
+        
         print('sum', sum_correct_first)
         to_output(subj_id, condition, exp_time, experiment_results_first, csv_experiment_output)
                      
         #------------------------------------------------------------ Main Experiment Ends ----------------------------------------------------------------------------------------------
         calculate_code(win, sum_correct_first)
-        
-        
-        event.waitKeys(keyList=['f2'])
         
         instruction_screen(win, 'second_part_1.jpg')
         instruction_screen(win, 'second_part_2.jpg')
@@ -580,6 +587,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         sum_correct_second = 0
         for round_data in main_data:
             t += 1
+            tracker.setTriggerValue(2000+t)
             flip_time=win.flip()
             
             time.sleep(0.5)
@@ -598,6 +606,8 @@ class ExperimentRuntime(ioHubExperimentRuntime):
 
             flip_time=win.flip()
             
+        tracker.setTriggerValue(2500)
+        
         calculate_code_second(win, sum_correct_first, sum_correct_second)
         
         #print('sum', sum_correct)
@@ -631,7 +641,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         # (i.e. the space key was pressed)
         #
         flip_time=win.flip()
-        self.hub.sendMessageEvent(text='EXPERIMENT_COMPLETE',sec_time=flip_time)
+        self.hub.sendMessageEvent(text='EXPERIMENT_COMPLETE', sec_time=flip_time)
         tracker.setRecordingState(False)
         tracker.setConnectionState(False)
         
