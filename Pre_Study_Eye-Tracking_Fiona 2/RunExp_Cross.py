@@ -338,16 +338,9 @@ class ExperimentRuntime(ioHubExperimentRuntime):
                 draw_screen(win, round_data, pressup, is_trial)
             
             print(results)
-            
-            #here we enforce to continue despite pressing the key, I have commented it out so you can remember what you were doing here
-            #k = event.waitKeys(keyList=['f2', 'up', 'down'])
+
             if e[0] == 'f2':
                experiment_ends(win)
-            #if k[0] == 'f2':
-            #    win.close()
-            #    core.quit()
-            #elif k[0] == ['up','down']:
-            #    pass
             return results
             
         
@@ -440,11 +433,15 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             
         def experiment_ends(win):
             # Disconnect the eye tracking device.
-            global exp_script_dir,subj_id, localtime, tracker
+            global exp_script_dir,subj_id, localtime, tracker, experiment_end
+            
             # So the experiment is done, all trials have been run.
             # Clear the screen and show an 'experiment  done' message using the
             # instructionScreen state. What for the trigger to exit that state.
             # (i.e. the space key was pressed)
+            
+            to_output(subj_id, condition, exp_time, experiment_results_first, csv_experiment_output)
+            
             #
             flip_time=win.flip()
             self.hub.sendMessageEvent(text='EXPERIMENT_COMPLETE', sec_time=flip_time)
@@ -469,6 +466,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             win.close()
             self.hub.quit()
             print('end of exp logic')
+            experiment_end =1
         
         
         ### End of experiment logic
@@ -476,7 +474,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             
         #****************Collect Information about the Subject****************************
         
-        global tracker, exp_script_dir, subj_id, localtime
+        global tracker, subj_id, localtime
         
         selected_eyetracker_name=args[0]
         
@@ -591,6 +589,12 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             
             experiment_results_first.append(round_results)
             
+            try:
+                print('exp end', experiment_end)
+                if (experiment_end ==1):
+                    sys.exit('The experiment was stopped')
+            except NameError:
+                print ("global name 'experiment_end' is not defined")
             
             win.flip()
 
