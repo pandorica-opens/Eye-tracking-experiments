@@ -190,7 +190,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             elif k[0] == 'up' or 'down':
                 pass
 
-        def to_output(subj_id, condition, localtime, results, output_file_dir):
+        def to_output(subj_id, experiment_number, condition, localtime, results, output_file_dir):
             
             
             import os.path 
@@ -217,11 +217,11 @@ class ExperimentRuntime(ioHubExperimentRuntime):
                     row.append(results[i]['pressup_time'])
                     row.append(results[i]['correct_answer'])
                     
-                    row.insert(0,str(i+1)) 
+                    row.insert(0,str(experiment_number*1000+i+1)) 
                     row.insert(1, str(subj_id))
                     row.insert(2, str(condition))
-                    #row.insert(3, str(localtime)) #here you are actually outputing local time in the date format and not in the seconds
-                    row.insert(3, str(localtime))
+                    #here you are actually outputing local time in the date format and not in the seconds
+                    row.insert(3, str(localtime)) 
                     row.insert(4, results[i]['picked_item'])
                     #print('rows', row)
                     
@@ -265,7 +265,6 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             number_2 = visual.TextStim(win, text=round_data[int(display_order[1])], height=20, units='pix', pos = [-120,-350])
             number_3 = visual.TextStim(win, text=round_data[int(display_order[2])], height=20, units='pix', pos = [120,-150])
             number_4 = visual.TextStim(win, text=round_data[int(display_order[3])], height=20, units='pix', pos = [120,-350])
-            
             
                 
             line.draw()
@@ -314,12 +313,10 @@ class ExperimentRuntime(ioHubExperimentRuntime):
                     pressup = 1
                     results['pressup'] = '1'
                     results['pressup_time'] = getTime()
-                    #results['pressup_time'] = round(clock.getTime(), 2)
                     
                 elif e[0] in ['down'] and not pressup:
                     pressup = 0
                     results['pressup'] = '0'
-                    #results['pressup_time'] = round(clock.getTime(), 2)
                     results['pressup_time'] = getTime()
                 
                 #print('round data 9', round_data[13])
@@ -384,8 +381,6 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             
 
             line = visual.Line(win, start=(-700, 0), end=(700, 0)) 
-
-
             
             tableB.draw()
             tableC.draw()
@@ -439,8 +434,6 @@ class ExperimentRuntime(ioHubExperimentRuntime):
             # Clear the screen and show an 'experiment  done' message using the
             # instructionScreen state. What for the trigger to exit that state.
             # (i.e. the space key was pressed)
-            
-            to_output(subj_id, condition, exp_time, experiment_results_first, csv_experiment_output)
             
             #
             flip_time=win.flip()
@@ -575,15 +568,19 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         sum_correct_first = 0
         for round_data in main_data:
             t += 1
-            tracker.setTriggerValue(1000+t)
+            
+            tracker.setTriggerValue(1100)
             flip_time=win.flip()
             
             time.sleep(0.5)
+            
+            tracker.setTriggerValue(1200)
             
             fixation_cross(win)
             
             time.sleep(0.5)
             
+            tracker.setTriggerValue(1000+t)
             round_results = do_round(win, round_data, is_trial = False)
             sum_correct_first = sum_correct_first + int(round_results['correct_answer'])
             
@@ -603,7 +600,7 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         tracker.setTriggerValue(1500)
         
         print('sum', sum_correct_first)
-        to_output(subj_id, condition, exp_time, experiment_results_first, csv_experiment_output)
+        to_output(subj_id, 1, condition, exp_time, experiment_results_first, csv_experiment_output)
                      
         #------------------------------------------------------------ Main Experiment Ends ----------------------------------------------------------------------------------------------
         calculate_code(win, sum_correct_first)
@@ -627,15 +624,20 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         sum_correct_second = 0
         for round_data in main_data:
             t += 1
-            tracker.setTriggerValue(2000+t)
+            tracker.setTriggerValue(2100)
+            
             flip_time=win.flip()
             
             time.sleep(0.5)
+            
+            tracker.setTriggerValue(2200)
             
             fixation_cross(win)
             
             time.sleep(0.5)
             
+            
+            tracker.setTriggerValue(2000+t)
             
             round_results = do_round(win, round_data, is_trial = False)
             sum_correct_second = sum_correct_second + int(round_results['correct_answer'])
@@ -651,21 +653,12 @@ class ExperimentRuntime(ioHubExperimentRuntime):
         calculate_code_second(win, sum_correct_first, sum_correct_second)
         
         #print('sum', sum_correct)
-        to_output(subj_id, condition, exp_time, experiment_results_second, csv_experiment_output)
+        to_output(subj_id, 2, condition, exp_time, experiment_results_second, csv_experiment_output)
                      
         #------------------------------------------------------------ Main Experiment 2 Ends ----------------------------------------------------------------------------------------------
                    
                        
         #=============== Draw Last Screen (Payoff) ==================
-        '''selected_round_idx = random.randint(0, len(experiment_results)-1)
-        selected_round_results = experiment_results[selected_round_idx]
-                        
-        selected_round_data = []
-        for round_data in main_data:
-            #print(round_data[0], selected_round_results['picked_item'])
-            if int(round_data[0]) == int(selected_round_results['picked_item']):
-                selected_round_data = round_data
-                                
         #draw_payoff(win, selected_round_data, selected_round_results, trial_id=selected_round_idx+1)'''
         
         
@@ -754,7 +747,7 @@ if __name__ == "__main__":
             accepted = True
             #uncomment in case of calibration
             
-            ''' while True:
+            '''while True:
                 line=p.stdout.readline()
                 
                 print line
