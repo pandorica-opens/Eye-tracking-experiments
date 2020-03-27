@@ -17,8 +17,6 @@ from psychopy.iohub import (EventConstants, EyeTrackerConstants,
 import os
 import random
 import site
-
-import os
 import eventtxt
 import subprocess
 import csv
@@ -36,15 +34,15 @@ order_file_dir = 'order_input_file.csv'
 output_file_dir = 'Exp Results\\'+'output_file.csv'
 n_conditions = 8
 
+# which points? 
 points_in_euros = 0.014
 showup_fee = 8.0
 incentivation = 0.10
 
-
-
 blank_screen_duration = 0.5 #in seconds...
 
-code_table = {'0':'D', '1':'K', '2':'L', '3':'B', '4':'F', '5':'A', '6':'N', '7':'Q', '8':'X', '9':'E'}
+# not used in the code
+#code_table = {'0':'D', '1':'K', '2':'L', '3':'B', '4':'F', '5':'A', '6':'N', '7':'Q', '8':'X', '9':'E'}
 
 class ExperimentRuntime(ioHubExperimentRuntime):
     """
