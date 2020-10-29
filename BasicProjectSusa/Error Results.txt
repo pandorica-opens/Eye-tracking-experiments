@@ -1,9 +1,0 @@
-35.7783 	ERROR 	Couldn't find image file 'Instructionslank_screen.jpg'; check path?
-38.3189 	ERROR 	Couldn't find image file 'Instructionslank_screen.jpg'; check path?
-26.1711 	ERROR 	Couldn't find image file 'Instructionslank_screen.jpg'; check path?
-45.3350 	ERROR 	Couldn't find image file 'Instructionslank_screen.jpg'; check path?
-23.5978 	WARN 	t of last frame was 4303.05ms (=1/0)
-27.9149 	WARN 	t of last frame was 4317.04ms (=1/0)
-32.2475 	WARN 	t of last frame was 4300.11ms (=1/0)
-36.5473 	WARN 	t of last frame was 4299.84ms (=1/0)
-40.8635 	WARN 	Multiple dropped frames have occurred - I'll stop bothering you about them!
